@@ -37,6 +37,10 @@ module TeamCA.Machine.Types
             , Div
             , Output
             , Phi )
+    -- Solutions
+    , Frame(..)
+    , Solution(..)
+
     ) where
 
 import Prelude hiding (lookup)
@@ -178,6 +182,16 @@ instance Enum DOper where
     toEnum 4 = Div
     toEnum 5 = Output
     toEnum 6 = Phi
+
+type TeamID = Int
+type ScenarioID = Int
+type TimeStep = Int
+
+data Solution = Solution TeamID ScenarioID [Frame]
+    deriving (Ord, Eq, Show)
+
+data Frame = Frame TimeStep Ports
+    deriving (Ord, Eq, Show)
 
 data DType = DType DOper Addr Addr
     deriving (Ord, Eq, Show)

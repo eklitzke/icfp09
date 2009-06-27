@@ -5,6 +5,8 @@ module TeamCA.Machine
 import Data.Array.IO
 import Data.Word
 
+import TeamCA.Machine.Util
+
 -- An Addr is really 14 bits, but this should be close enough
 type Addr = Word16
  
@@ -18,10 +20,20 @@ data Imm =  LTZ
           | GTZ deriving (Show, Eq, Ord, Enum)
  
  
- 
+-- These are operations that require two source registers, as specified in Table
+-- 1 of the problem specification
 data DOper =  Add
             | Sub
-            | Mult -- etc.
+            | Mult
+            | Div
+            | Output
+            | Phi deriving (Show, Eq, Ord)
+
+data SOper =  Noop
+            | Cmpz
+            | Sqrt
+            | Copy
+            | Input
  
 data DType = DOper Addr Addr
  

@@ -9,10 +9,11 @@ module TeamCA.Machine.Types
     , Instructions
     , Memory
     , ProgramCounter
-    , StatusR
-    , World
+    , StatusR (On, Off)
+    , World(World)
     ) where
 
+import Data.Array.Unboxed
 import Data.Array.IO
 import Data.Word
 
@@ -45,9 +46,9 @@ instance Enum Imm where
 type ProgramCounter = Addr
  
 -- The instruction set is immutable
-type Instructions = IOArray Addr Word32
+type Instructions = UArray Addr Word32
  
 -- Memory is mutable
-type Memory = IOArray Addr Word64
+type Memory = IOArray Addr Double
  
 data World = World ProgramCounter StatusR Instructions Memory

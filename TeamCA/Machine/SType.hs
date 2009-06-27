@@ -1,6 +1,10 @@
 module TeamCA.Machine.SType
-    ( SOper
-    , SType(SType)
+    ( SType(SType)
+    , SOper ( Noop
+            , Cmpz
+            , Sqrt
+            , Copy
+            , Input )
     ) where
 
 import TeamCA.Machine.Types

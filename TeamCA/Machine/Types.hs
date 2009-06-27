@@ -46,7 +46,7 @@ module TeamCA.Machine.Types
 import Prelude hiding (lookup)
 import Data.Array.Unboxed
 import Data.Array.IO
-import Data.Map
+import Data.Map hiding (elems)
 import Data.Word
 
 -- The status register
@@ -124,7 +124,7 @@ newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0.0)
 data World = World ProgramCounter StatusR Ports Instructions Memory
 
 instance Show World where
-    show (World pc sr ports is ms) = "World(pc=" ++ show pc ++ " ports=" ++ show (toList ports) ++ " instrs=" ++ show (bounds is) ++ ")"
+    show (World pc sr ports is ms) = "World(pc=" ++ show pc ++ " ports=" ++ show (toList ports) ++ ")"
 
 
 data SOper =  Noop

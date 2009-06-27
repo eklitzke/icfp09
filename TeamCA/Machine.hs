@@ -42,6 +42,7 @@ readData is addr = readArray is addr
 step :: World -> IO World
 step (World pc sr ports is ms) = do
   let instr = readText is pc
+  --putStrLn $ "step: instr = " ++ (show instr) ++ " pc = " ++ (show pc)
   sr' <- newIORef sr
   ports' <- newIORef ports
   pc' <- newIORef (pc + 1)
@@ -67,8 +68,7 @@ step (World pc sr ports is ms) = do
     Right (DType Sub  r1 r2) -> rHelper r1 r2 (-)
     Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
     Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
-    Right (DType Output r1 r2) -> do putStrLn $ "doing an Output to port " ++ show r1
-                                     v <- readData ms r2
+    Right (DType Output r1 r2) -> do v <- readData ms r2
                                      let r1' = fromIntegral r1
                                      writeIORef ports' (writePort r1' v ports)
                                      return ()
@@ -90,7 +90,7 @@ step (World pc sr ports is ms) = do
 runWorld :: World -> IO World
 runWorld w = do
   w' <- step w
-  loop w
+  loop w'
   where
     loop n@(World pc _ _ _ _)
         | pc == 0  = return n

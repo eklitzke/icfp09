@@ -48,11 +48,7 @@ getInstruction :: Get (Either SType DType)
 getInstruction = fmap decodeInstruction getWord32le
 
 readOBF :: FilePath -> IO OBF
-readOBF fp = do
-  OBF t d <- decodeFile fp
-  return $ OBF (t `snoc` (decodeInstruction $ 5 `shiftL` 24)) (d `snoc` 0.0)
-    where
-      snoc xs x = xs ++ [x]
+readOBF fp = decodeFile fp
 
 data OBF = OBF [Instruction] [Double]
 

@@ -14,11 +14,13 @@ module TeamCA.Machine.Types
     , Ports
     , World(World)
     , newPorts
+    , emptyPorts
     , readPort
     , writePort
     , newMemory
     , mkInstructions
-    , ports
+    , outputPorts
+    , inputPorts
 
     -- SType
     , SType(SType)
@@ -101,6 +103,9 @@ readPort k m = case lookup k m of
 newPorts :: Double -> Ports
 newPorts c = fromList [(0x2, 0.0), (0x3, 0.0), (0x3e80, c)]
 
+emptyPorts :: Ports
+emptyPorts = Data.Map.empty
+
 -- Make an instruction array from a list of word32 instructions
 mkInstructions :: [Instruction] -> Instructions
 mkInstructions is = listArray (addrMin, addrMax) (is ++ [Left $ SType End undefined undefined])
@@ -117,14 +122,18 @@ addrMin = 0
 newMemory :: [Double] -> IO Memory
 newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0.0)
 
-data World = World ProgramCounter StatusR Ports Instructions Memory
+type InputPorts = Ports
 
-ports (World _ _ p _ _) = p
+type OutputPorts = Ports
 
+data World = World ProgramCounter StatusR InputPorts OutputPorts Instructions Memory
+
+inputPorts (World _ _ ip _ _ _) = ip
+
+outputPorts (World _ _ _ op _ _) = op
 
 instance Show World where
-    show (World pc sr ports is ms) = "World(pc=" ++ show pc ++ " ports=" ++ show (toList ports) ++ ")"
-
+    show (World pc sr iports oports is ms) = "World(pc=" ++ show pc ++ " iports=" ++ show (toList iports) ++ " oports=" ++ show (toList oports) ++ ")"
 
 data SOper =  Noop
             | Cmpz

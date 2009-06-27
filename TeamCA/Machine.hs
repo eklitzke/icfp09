@@ -40,11 +40,11 @@ readData is addr = readArray is addr
 -- (i.e. by reading from the output ports, writing to the input ports, etc. as
 -- necessary).
 step :: World -> IO World
-step (World pc sr ports is ms) = do
+step (World pc sr iports oports is ms) = do
   let instr = readText is pc
   --putStrLn $ "step: instr = " ++ (show instr) ++ " pc = " ++ (show pc)
   sr' <- newIORef sr
-  ports' <- newIORef ports
+  oports' <- newIORef oports
   pc' <- newIORef (pc + 1)
   case instr of
     Left (SType Noop _ _)   -> return ()
@@ -60,7 +60,7 @@ step (World pc sr ports is ms) = do
                                 writeData (sqrt v)
     Left (SType Copy _ r) -> do v <- readData ms r
                                 writeData v
-    Left (SType Input _ r) -> do let v = readPort (round $ fromIntegral r) ports
+    Left (SType Input _ r) -> do let v = readPort (round $ fromIntegral r) iports
                                  writeData v
     Left (SType End _ _) -> do writeIORef pc' 0
                                writeIORef sr' Off
@@ -70,7 +70,7 @@ step (World pc sr ports is ms) = do
     Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
     Right (DType Output r1 r2) -> do v <- readData ms r2
                                      let r1' = fromIntegral r1
-                                     writeIORef ports' (writePort r1' v ports)
+                                     writeIORef oports' (writePort r1' v oports)
                                      return ()
     Right (DType Phi  r1 r2) -> do val <- case sr of
                                             On  -> readData ms r1
@@ -78,9 +78,9 @@ step (World pc sr ports is ms) = do
                                    writeData val
 
   srVal <- readIORef sr'
-  portsVal <- readIORef ports'
+  oportsVal <- readIORef oports'
   pcVal <- readIORef pc'
-  return $ World pcVal srVal portsVal is ms
+  return $ World pcVal srVal iports oportsVal is ms
     where
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2
@@ -92,20 +92,20 @@ runWorld w = do
   w' <- step w
   loop w'
   where
-    loop n@(World pc _ _ _ _)
+    loop n@(World pc _ _ _ _ _)
         | pc == 0  = return n
         | otherwise = do n' <- step n
                          loop n'
 
 updateWorld :: World -> (Ports -> Ports) -> World
-updateWorld (World pc sr ports is ms) f = World pc sr (f ports) is ms
+updateWorld (World pc sr iports oports is ms) f = World pc sr (f oports) oports is ms
 
 -- Convert an OBF to a World
 obfToWorld :: OBF -> Int -> IO World
 obfToWorld (OBF is ds) cfg = do
     memory <- newMemory ds
     let instrs = mkInstructions is
-    return $ World 0 Off (newPorts $ fromIntegral cfg) instrs memory
+    return $ World 0 Off (newPorts $ fromIntegral cfg) emptyPorts instrs memory
 
 -- Run an .obf
 readWorld :: FilePath -> Int -> IO World

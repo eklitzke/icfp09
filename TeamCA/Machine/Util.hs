@@ -31,5 +31,5 @@ extractOpImm w
     | w >= 0x4000 = error ("Invalid OpImm value: " ++ (show w))
     | otherwise   = fromPair (op, imm)
     where
-      op = (w .&. 0xf00) `shiftR` 8
-      imm = w .&. 0xff
+      op = (w .&. 0x3c0) `shiftR` 10
+      imm = w .&. 0x3ff

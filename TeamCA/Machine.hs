@@ -111,9 +111,9 @@ obfToWorld (OBF is ds) cfg = do
 readWorld :: FilePath -> Int -> IO World
 readWorld filename cfg = do
     obf @ (OBF instructions datas) <- readOBF filename
-    hPutStrLn stderr $ "Read the this many instructions:" ++ (show . length $ instructions)
-    hPutStrLn stderr $ "Read the this many data:" ++ (show . length $ datas)
-    hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
+    --hPutStrLn stderr $ "Read the this many instructions:" ++ (show . length $ instructions)
+    --hPutStrLn stderr $ "Read the this many data:" ++ (show . length $ datas)
+    --hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
     --hPutStrLn stderr $ "Read the following data: " ++ (show datas)
     world <- obfToWorld obf cfg
     return world

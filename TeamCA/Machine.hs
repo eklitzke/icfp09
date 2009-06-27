@@ -37,7 +37,7 @@ readData is addr = readArray is addr
 
 step :: World -> IO World
 step (World pc sr is ms) = do
-  instr <- readText is pc
+  let instr = readText is pc
   sr' <- newIORef sr
   case instr of
     Left (SType Noop _ _) -> ()

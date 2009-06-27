@@ -2,6 +2,7 @@ module TeamCA.Machine.Util
     (
       extractOper
     , extractLower
+    , extractOpImm
     ) where
 
 import Data.Bits

@@ -34,4 +34,4 @@ extractOpImm w
     | otherwise   = fromPair (op, imm)
     where
       op = w `shiftR` 10
-      imm = w .&. 0x3ff
+      imm = (w .&. 0x3ff) `shiftR` 6

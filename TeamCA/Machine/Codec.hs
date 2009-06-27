@@ -6,8 +6,6 @@ import Data.Binary.Get
 import qualified Data.ByteString
 import Data.ByteString.Lazy (fromChunks)
 
-import TeamCA.Machine.SType (SType(..))
-import TeamCA.Machine.DType (DType(..))
 import TeamCA.Machine.Types
 import TeamCA.Machine.Util
 

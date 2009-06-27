@@ -1,6 +1,11 @@
 module TeamCA.Machine.DType
-    ( DType(DType)
-    , DOper
+    ( DType (DType)
+    , DOper ( Add
+            , Sub
+            , Mult
+            , Div
+            , Output
+            , Phi )
     ) where
 
 import TeamCA.Machine.Types

@@ -1,6 +1,10 @@
-module TeamCA.Machine ( decodeWord ) where
+module TeamCA.Machine ( step ) where
 
 import Data.Word
+import Data.IORef
+
+import Data.Array.Unboxed
+import Data.Array.IO
 
 import TeamCA.Machine.DType
 import TeamCA.Machine.SType
@@ -23,3 +27,47 @@ decodeWord w
       (oper', imm) = extractOpImm hAddr
       hAddr' = fromIntegral hAddr
       lAddr' = fromIntegral lAddr
+
+-- Read an instruction from a specified address
+readText :: Instructions -> Addr -> Either SType DType
+readText is addr = decodeWord (is ! addr)
+
+readData :: Memory -> Addr -> Double
+readData is addr = is ! addr
+
+step :: World -> IO World
+step (World pc sr is ms) = do
+  instr <- readText is pc
+  sr' <- newIORef sr
+  case instr of
+    Left (SType Noop _ _) -> ()
+    Left (SType Cmpz imm r) -> do v <- readData ms r
+                                  let sr'' = case imm of
+                                           LTZ -> r < 0
+                                           LEZ -> r <= 0
+                                           EQZ -> r == 0
+                                           GEZ -> r >= 0
+                                           GTZ -> r > 0
+                                  writeIORef sr' (if sr'' then On else Off)
+    Left (SType Sqrt _ r) -> do v <- readData ms r
+                                writeData (sqrt v)
+    Left (SType Copy _ r) -> do v <- readData ms r
+                                writeData v
+    Left (SType Input _ r) -> error "Input not implemented"
+
+    Right (DType Add  r1 r2) -> rHelper r1 r2 (+)
+    Right (DType Sub  r1 r2) -> rHelper r1 r2 (-)
+    Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
+    Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
+    Right (DType Output _ _) -> error "Output not implemented"
+    Right (DType Phi  r1 r2) -> writeData $ case sr of
+                                  On  -> return $ readData ms r1
+                                  Off -> return $ readData ms r2
+  srVal <- readIORef sr'
+  return World (pc+1) srVal is ms
+    where
+      rHelper r1 r2 mut = do v1 <- readData ms r1
+                             v2 <- readData ms r2
+                             writeData (mut v1 v2)
+      
+      writeData v = writeArray ms sr v

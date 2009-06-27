@@ -16,6 +16,7 @@ Library
   Build-Depends:  array
                 , base
                 , binary
+                , bytestring
 
 Executable vm
     main-is:      Main.hs

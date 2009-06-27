@@ -7,7 +7,7 @@ all:
 clean:
 	-rm -rf dist
 
-test:
-	echo testing
+run-%: all
+	dist/build/vm/vm problems/bin$*.obf
 
 .PHONY: test all

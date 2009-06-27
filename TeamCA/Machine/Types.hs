@@ -18,7 +18,7 @@ module TeamCA.Machine.Types
     , writePort
     , newMemory
     , mkInstructions
-    , emptyPorts
+    , ports
 
     -- SType
     , SType(SType)
@@ -40,9 +40,6 @@ module TeamCA.Machine.Types
     -- Solutions
     , Frame(..)
     , Solution(..)
-    , sc1Output
-    , SC1Out
-
     ) where
 
 import Prelude hiding (lookup)
@@ -103,9 +100,6 @@ readPort k m = case lookup k m of
 -- |Create a new set of input ports with configuration value c.
 newPorts :: Double -> Ports
 newPorts c = fromList [(0x2, 0.0), (0x3, 0.0), (0x3e80, c)]
-
-emptyPorts :: Ports
-emptyPorts = fromList []
 
 -- Make an instruction array from a list of word32 instructions
 mkInstructions :: [Instruction] -> Instructions
@@ -200,22 +194,4 @@ data Frame = Frame TimeStep Ports
 
 data DType = DType DOper Addr Addr
     deriving (Ord, Eq, Show)
-
-
-data SC1Out = SC1Out { 
-    sc1Score :: Double,
-    sc1Fuel :: Double,
-    sc1Pos :: (Double, Double),
-    sc1Radius :: Double
-}
-    deriving (Ord, Eq, Show)
-
-sc1Output world = SC1Out score fuel pos radius
-    where fuel = look 0x1
-          score = look 0x0
-          pos = (look 0x2, look 0x3)
-          radius = look 0x4
-          values = ports world
-          look k = Data.Map.findWithDefault 0.0 k values
-
 

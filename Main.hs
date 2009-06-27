@@ -5,6 +5,7 @@ import System.Environment (getArgs)
 import TeamCA.Machine.Types
 import TeamCA.Machine
 import Data.Map
+import qualified TeamCA.Strategies.S1 as S1
 
 runSimulator :: FilePath -> Int -> (Ports -> Ports) -> IO ()
 runSimulator fp cfg mut = do
@@ -13,7 +14,7 @@ runSimulator fp cfg mut = do
   return ()
   where
     run w = do w' <- runWorld w
-               print $ sc1Output w'
+               print $ S1.output w'
                run $ updateWorld w' mut
 
 -- ACCELERATE

@@ -117,4 +117,3 @@ readWorld filename cfg = do
     --hPutStrLn stderr $ "Read the following data: " ++ (show datas)
     world <- obfToWorld obf cfg
     return world
-

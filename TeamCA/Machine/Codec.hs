@@ -45,7 +45,6 @@ writeSolution :: FilePath -> Solution -> IO ()
 writeSolution = encodeFile
 
 putIEEE754le val = putWord64le . doubleToWord64 $ val
-    
 
 decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w

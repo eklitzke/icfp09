@@ -21,7 +21,7 @@ runSimulator fp cfg mut = do
   return ()
   where
     run w = do w' <- runWorld w
-               print w'
+               print $ sc1Output w'
                run $ updateWorld w' mut
 
 -- ACCELERATE
@@ -32,10 +32,13 @@ strategy p0 = pf
       p2 = insert 3 100.0 p1
       pf = p2
 
+emptyStrategy :: Ports -> Ports
+emptyStrategy p0 = p0
+
 main = do
   putStrLn "-= ICFP'09 Sim =-"
   args <- getArgs
   case args of
     [] -> error "expecting a file"
     [obfName, config] -> do let cfg = read config :: Int
-                            runSimulator obfName cfg strategy
+                            runSimulator obfName cfg emptyStrategy

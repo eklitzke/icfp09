@@ -40,6 +40,8 @@ module TeamCA.Machine.Types
     -- Solutions
     , Frame(..)
     , Solution(..)
+    , sc1Output
+    , SC1Out
 
     ) where
 
@@ -123,6 +125,9 @@ newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0.0)
 
 data World = World ProgramCounter StatusR Ports Instructions Memory
 
+ports (World _ _ p _ _) = p
+
+
 instance Show World where
     show (World pc sr ports is ms) = "World(pc=" ++ show pc ++ " ports=" ++ show (toList ports) ++ ")"
 
@@ -195,3 +200,22 @@ data Frame = Frame TimeStep Ports
 
 data DType = DType DOper Addr Addr
     deriving (Ord, Eq, Show)
+
+
+data SC1Out = SC1Out { 
+    sc1Score :: Double,
+    sc1Fuel :: Double,
+    sc1Pos :: (Double, Double),
+    sc1Radius :: Double
+}
+    deriving (Ord, Eq, Show)
+
+sc1Output world = SC1Out score fuel pos radius
+    where fuel = look 0x1
+          score = look 0x0
+          pos = (look 0x2, look 0x3)
+          radius = look 0x4
+          values = ports world
+          look k = Data.Map.findWithDefault 0.0 k values
+
+

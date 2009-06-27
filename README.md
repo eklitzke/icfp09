@@ -1,5 +1,9 @@
 Contest entry for ICFP 2009.
 
+Building
+========
+    cabal install
+
 Resources
 =========
 The contest home page is at http://icfpcontest.org/

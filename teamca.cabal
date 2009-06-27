@@ -1,0 +1,18 @@
+Author:        Evan Klitzke, Brandon Bickford
+Name:          teamca
+Version:       0.0.1
+Cabal-Version: >= 1.2
+License:       AllRightsReserved
+Category:      Proprietary
+Copyright:     (c) 2009 by Evan Klitzke, Brandon Bickford
+Synopsis:      ICFP09 entry
+Description:
+  cool codez.
+ 
+Build-Type: Simple
+
+Library
+  Exposed-Modules: TeamCA.Machine
+  Build-Depends:  array
+                , base
+                , binary

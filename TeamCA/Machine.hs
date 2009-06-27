@@ -37,10 +37,10 @@ readData is addr = readArray is addr
 
 step :: World -> IO World
 step (World pc sr is ms) = do
-  instr <- readText is pc
+  let instr = readText is pc
   sr' <- newIORef sr
   case instr of
-    Left (SType Noop _ _) -> ()
+    Left (SType Noop _ _) -> return ()
     Left (SType Cmpz imm r) -> do v <- readData ms r
                                   let sr'' = case imm of
                                            LTZ -> r < 0
@@ -49,6 +49,7 @@ step (World pc sr is ms) = do
                                            GEZ -> r >= 0
                                            GTZ -> r > 0
                                   writeIORef sr' (if sr'' then On else Off)
+                                  return ()
     Left (SType Sqrt _ r) -> do v <- readData ms r
                                 writeData (sqrt v)
     Left (SType Copy _ r) -> do v <- readData ms r
@@ -60,9 +61,10 @@ step (World pc sr is ms) = do
     Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
     Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
     Right (DType Output _ _) -> error "Output not implemented"
-    Right (DType Phi  r1 r2) -> writeData $ case sr of
+    Right (DType Phi  r1 r2) -> val <- case sr of
                                   On  -> return $ readData ms r1
                                   Off -> return $ readData ms r2
+                                writeData val
   srVal <- readIORef sr'
   return World (pc+1) srVal is ms
     where
@@ -70,4 +72,4 @@ step (World pc sr is ms) = do
                              v2 <- readData ms r2
                              writeData (mut v1 v2)
       
-      writeData v = writeArray ms sr v
+      writeData v = writeArray ms pc v

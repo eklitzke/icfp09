@@ -21,7 +21,7 @@ extractOper w = fromIntegral $ (w .&. 0xf0000000) `shiftR` 28
 extractLower :: Word32 -> (Int, Int)
 extractLower w = fromPair (hi, lo)
     where
-      hi = (w .&. 0xf0000000) `shiftR` 14
+      hi = (w .&. 0xfffffff) `shiftR` 14
       lo = w .&. 0x3fff
 
 -- |This extracts a 14 bit quantity in the bit range [27, 14] into the pair
@@ -29,9 +29,9 @@ extractLower w = fromPair (hi, lo)
 extractOpImm :: Int -> (Int, Int)
 extractOpImm w
     | w >= 0x4000 = error ("Invalid OpImm value: " ++ (show w))
-    | otherwise   = if op > 5
-                        then error ("bad op " ++ show op)
-                        else fromPair (op, imm)
+    | op > 5      = error ("Invalid op value: " ++ show op)
+    | imm > 4     = error ("Invalid imm value: " ++ show imm)
+    | otherwise   = fromPair (op, imm)
     where
       op = w `shiftR` 10
       imm = w .&. 0x3ff

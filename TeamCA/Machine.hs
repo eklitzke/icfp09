@@ -67,7 +67,8 @@ step (World pc sr ports is ms) = do
     Right (DType Sub  r1 r2) -> rHelper r1 r2 (-)
     Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
     Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
-    Right (DType Output r1 r2) -> do v <- readData ms r2
+    Right (DType Output r1 r2) -> do putStrLn $ "doing an Output to port " ++ show r1
+                                     v <- readData ms r2
                                      let r1' = fromIntegral r1
                                      writeIORef ports' (writePort r1' v ports)
                                      return ()
@@ -100,20 +101,20 @@ updateWorld :: World -> (Ports -> Ports) -> World
 updateWorld (World pc sr ports is ms) f = World pc sr (f ports) is ms
 
 -- Convert an OBF to a World
-obfToWorld :: OBF -> IO World
-obfToWorld (OBF is ds) = do
+obfToWorld :: OBF -> Int -> IO World
+obfToWorld (OBF is ds) cfg = do
     memory <- newMemory ds
     let instrs = mkInstructions is
-    return $ World 0 Off (newPorts 1001) instrs memory
+    return $ World 0 Off (newPorts $ fromIntegral cfg) instrs memory
 
 -- Run an .obf
-readWorld :: FilePath -> IO World
-readWorld filename = do
+readWorld :: FilePath -> Int -> IO World
+readWorld filename cfg = do
     obf @ (OBF instructions datas) <- readOBF filename
     hPutStrLn stderr $ "Read the this many instructions:" ++ (show . length $ instructions)
     hPutStrLn stderr $ "Read the this many data:" ++ (show . length $ datas)
-    --hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
+    hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
     --hPutStrLn stderr $ "Read the following data: " ++ (show datas)
-    world <- obfToWorld obf
+    world <- obfToWorld obf cfg
     return world
 

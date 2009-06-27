@@ -74,6 +74,10 @@ type ProgramCounter = Addr
 
 type Instruction = Either SType DType
 
+showInstruction :: Instruction -> String
+showInstruction (Left s) = show s
+showInstruction (Right d) = show d
+
 -- The instruction set is immutable
 type Instructions = Array Addr Instruction
 

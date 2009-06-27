@@ -9,26 +9,33 @@ import Data.Map
 configurationPort :: Int
 configurationPort = 16000
 
+-- A strategy is something you implement to run the simulation. It reads the
+-- output ports, and then writes to input ports to return a set of new port
+-- values. The world is then re-run with thse new ports.
+type Strategy = Ports -> Ports
+
 runSimulator :: FilePath -> Int -> (Ports -> Ports) -> IO ()
 runSimulator fp cfg mut = do
-  world <- readWorld fp
-  run (updateWorld world configure)
+  world <- readWorld fp cfg
+  run world
   return ()
   where
     run w = do w' <- runWorld w
                print w'
                run $ updateWorld w' mut
 
-    configure :: Ports -> Ports
-    configure = insert configurationPort (fromIntegral cfg)
-
+-- ACCELERATE
 strategy :: Ports -> Ports
-strategy = id
+strategy p0 = pf
+    where
+      p1 = insert 2 100.0 p0
+      p2 = insert 3 100.0 p1
+      pf = p2
 
 main = do
-    print "starting simulator"
-    args <- getArgs
-    case args of
-        [] -> error "expecting a file"
-        [obfName, config] -> do let cfg = read config :: Int
-                                runSimulator obfName cfg strategy
+  putStrLn "-= ICFP'09 Sim =-"
+  args <- getArgs
+  case args of
+    [] -> error "expecting a file"
+    [obfName, config] -> do let cfg = read config :: Int
+                            runSimulator obfName cfg strategy

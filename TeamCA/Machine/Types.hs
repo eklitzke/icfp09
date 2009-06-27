@@ -128,17 +128,19 @@ data SType = SType SOper Imm Addr
 
 -- The from/to enum is the opcode, as specified in the problem specification
 instance Enum SOper where
-    fromEnum Noop  = 1
-    fromEnum Cmpz  = 2
-    fromEnum Sqrt  = 3
-    fromEnum Copy  = 4
-    fromEnum Input = 5
+    fromEnum Noop  = 0
+    fromEnum Cmpz  = 1
+    fromEnum Sqrt  = 2
+    fromEnum Copy  = 3
+    fromEnum Input = 4
+    fromEnum End = 5
 
     toEnum 0 = Noop
     toEnum 1 = Cmpz
     toEnum 2 = Sqrt
     toEnum 3 = Copy
     toEnum 4 = Input
+    toEnum 5 = End
     toEnum x = error $ " unexpected SOper " ++ (show x)
 
 -- These are operations that require two source registers, as specified in Table

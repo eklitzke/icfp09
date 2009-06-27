@@ -3,12 +3,39 @@ module TeamCA.Machine.Codec where
 import Data.Binary
 import Data.Bits
 import Data.Binary.Get
+import Data.Binary.Put
+import Control.Monad
 import qualified Data.ByteString
 import Data.ByteString.Lazy (fromChunks)
+import qualified Data.Map
 
 import TeamCA.Machine.Types
 import TeamCA.Machine.Util
 
+reduceFrames :: [Frame] -> [Frame]
+reduceFrames [] = []
+reduceFrames (x@(Frame _ p) : [])
+                | (Data.Map.size p) > 0 = [x]
+                | otherwise  = []
+reduceFrames (x@(Frame _ p1) : (x'@(Frame _ p2) : xs)) 
+    | (Data.Map.size p1) == 0 = reduceFrames $ x' : xs
+    | p1 == p2 = reduceFrames $ x' : xs
+    | otherwise = x : (reduceFrames $ x' : xs)
+
+instance Binary Solution where
+    put (Solution team scenario frames) = do
+        putWord32le . fromIntegral $ 0xCAFEBABE
+        putWord32le . fromIntegral $ team
+        putWord32le . fromIntegral $ scenario
+        mapM_ put frames
+    get = undefined
+
+instance Binary Frame where
+    get = undefined
+    put (Frame ts port) = do 
+        putWord32le . fromIntegral $ ts
+        putWord32le . fromIntegral $ Data.Map.size port
+        --forM_ (Data.Map.toList port) \(addr, val) -> do 
 
 decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w

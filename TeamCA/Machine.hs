@@ -1,4 +1,4 @@
-module TeamCA.Machine ( 
+module TeamCA.Machine (
     step
     , run
     ) where
@@ -84,9 +84,21 @@ step (World pc sr ports is ms) = do
                              writeData (mut v1 v2)
       writeData v = writeArray ms pc v
 
--- Run a .obf in the simulator
+-- Convert an OBF to a World
+obfToWorld :: OBF -> IO World
+obfToWorld (OBF is ds) = do
+    memory <- newMemory ds
+    let instrs = mkInstructions is
+    return $ World 0 Off emptyPorts instrs memory
+
+-- Run an .obf
+run :: FilePath -> IO ()
 run filename = do
     obf @ (OBF instructions datas) <- readOBF filename
-    hPutStrLn stderr $ "read instrs:" ++ (show $ length instructions) ++ ", datas: " ++ (show $ length datas)
-    hPutStrLn stderr $ "ds" ++ (show datas)
+    hPutStrLn stderr $ "Read the this many instructions:" ++ (show . length $ instructions)
+    hPutStrLn stderr $ "Read the this many data:" ++ (show . length $ datas)
+    hPutStrLn stderr $ "Read the following data: " ++ (show datas)
+    world <- obfToWorld obf
+    return ()
+
 

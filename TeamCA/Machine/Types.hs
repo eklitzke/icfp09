@@ -13,6 +13,9 @@ module TeamCA.Machine.Types
     , World(World)
     , readPort
     , writePort
+    , newMemory
+    , mkInstructions
+    , emptyPorts
     ) where
 
 import Prelude hiding (lookup)
@@ -48,11 +51,11 @@ instance Enum Imm where
 
 -- The program counter
 type ProgramCounter = Addr
- 
+
 
 -- The instruction set is immutable
 type Instructions = UArray Addr Word32
- 
+
 -- Memory is mutable
 type Memory = IOArray Addr Double
 
@@ -69,5 +72,24 @@ readPort k m = case lookup k m of
 -- |Create a new set of input ports with configuration value c.
 newPorts :: Double -> Ports
 newPorts c = fromList [(0x2, 0.0), (0x3, 0.0), (0x3e80, c)]
+
+emptyPorts :: Ports
+emptyPorts = fromList []
+
+-- Make an instruction array from a list of word32 instructions
+mkInstructions :: [Word32] -> Instructions
+mkInstructions is = listArray (addrMin, addrMax) (is ++ repeat 0)
+
+-- The max address
+addrMax :: Addr
+addrMax = (2 ^ 14) - 1
+
+-- The min address
+addrMin :: Addr
+addrMin = 0
+
+-- Make memory from a list of doubles
+newMemory :: [Double] -> IO Memory
+newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0)
 
 data World = World ProgramCounter StatusR Ports Instructions Memory

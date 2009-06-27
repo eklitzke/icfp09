@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module TeamCA.Machine.Codec where 
     
 import Data.Binary
@@ -5,6 +7,8 @@ import Data.Bits
 import Control.Monad (liftM) 
 import Data.Binary.Get
 import Data.Word
+import qualified Data.ByteString
+import Data.ByteString.Lazy (fromChunks)
 
 import TeamCA.Machine.SType (SType(..))
 import TeamCA.Machine.DType (DType(..))
@@ -46,27 +50,30 @@ decodeIEEE exponentBits significandBits n = encodeFloat significand exponent
 getDoubleIEEEle :: Get Double
 getDoubleIEEEle = liftM word64ToDouble getWord64le
 
-
 getInstruction :: Get Instruction
 getInstruction = liftM decodeInstruction getWord32le 
 
-getInstructionsAndData :: Get ([Word32], [Double])
-getInstructionsAndData = do
-    e <- isEmpty
-    if e
-        then return ([], [])
-        else do
-                b <- bytesRead
-                if ((b `div` 96) `mod` 2) == 0
-                    then do
-                            datum <- getDoubleIEEEle
-                            instr <- getWord32le
-                            (instrs, datas) <- getInstructionsAndData
-                            return $ (instr : instrs, datum : datas)
-                    else do
-                            instr <- getWord32le
-                            datum <- getDoubleIEEEle
-                            (instrs, datas) <- getInstructionsAndData
-                            return $ (instr : instrs, datum : datas)
+readOBF :: FilePath -> IO OBF
+readOBF = decodeFile 
 
+data OBF = OBF [Word32] [Double]
 
+instance Binary OBF where
+    put a = undefined
+    get = do 
+        e <- isEmpty
+        if e
+            then return $ OBF [] []
+            else do
+                    b <- bytesRead
+                    if ((b `div` 12) `mod` 2) == 0
+                        then do
+                                datum <- getDoubleIEEEle
+                                instr <- getWord32le
+                                obf @(OBF instrs datas) <- get
+                                return $ OBF (instr : instrs) (datum : datas)
+                        else do
+                                instr <- getWord32le
+                                datum <- getDoubleIEEEle
+                                obf @(OBF instrs datas) <- get
+                                return $ OBF (instr : instrs) (datum : datas)

@@ -86,8 +86,7 @@ step (World pc sr ports is ms) = do
 
 -- Run a .obf in the simulator
 run filename = do
-    bs <- Data.ByteString.readFile filename
-    let (instructions, datas) = runGet getInstructionsAndData $ fromChunks [bs]
+    obf @ (OBF instructions datas) <- readOBF filename
     hPutStrLn stderr $ "read instrs:" ++ (show $ length instructions) ++ ", datas: " ++ (show $ length datas)
     hPutStrLn stderr $ "ds" ++ (show datas)
 

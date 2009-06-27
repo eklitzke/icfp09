@@ -27,7 +27,7 @@ import TeamCA.Machine.Util
 
 -- Read an instruction from a specified address
 readText :: Instructions -> Addr -> Either SType DType
-readText is addr = decodeInstruction (is ! addr)
+readText is addr = is ! addr
 
 readData :: Memory -> Addr -> IO Double
 readData is addr = readArray is addr
@@ -89,7 +89,7 @@ obfToWorld :: OBF -> IO World
 obfToWorld (OBF is ds) = do
     memory <- newMemory ds
     let instrs = mkInstructions is
-    return $ World 0 Off emptyPorts instrs memory
+    return $ World 0 Off (newPorts 1001) instrs memory
 
 -- Run an .obf
 run :: FilePath -> IO ()

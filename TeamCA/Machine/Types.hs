@@ -16,6 +16,24 @@ module TeamCA.Machine.Types
     , newMemory
     , mkInstructions
     , emptyPorts
+
+    -- SType
+    , SType(SType)
+    , SOper ( Noop
+            , Cmpz
+            , Sqrt
+            , Copy
+            , Input
+            , End )
+
+    -- DType
+    , DType (DType)
+    , DOper ( Add
+            , Sub
+            , Mult
+            , Div
+            , Output
+            , Phi )
     ) where
 
 import Prelude hiding (lookup)
@@ -23,7 +41,6 @@ import Data.Array.Unboxed
 import Data.Array.IO
 import Data.Map
 import Data.Word
-
 
 -- The status register
 data StatusR = On | Off deriving (Show, Eq)
@@ -52,9 +69,10 @@ instance Enum Imm where
 -- The program counter
 type ProgramCounter = Addr
 
+type Instruction = Either SType DType
 
 -- The instruction set is immutable
-type Instructions = UArray Addr Word32
+type Instructions = UArray Addr Instruction
 
 -- Memory is mutable
 type Memory = IOArray Addr Double
@@ -77,8 +95,8 @@ emptyPorts :: Ports
 emptyPorts = fromList []
 
 -- Make an instruction array from a list of word32 instructions
-mkInstructions :: [Word32] -> Instructions
-mkInstructions is = listArray (addrMin, addrMax) (is ++ repeat 0)
+mkInstructions :: [Instruction] -> Instructions
+mkInstructions is = listArray (addrMin, addrMax) is --(is ++ [Left $ SType End undefined undefined])
 
 -- The max address
 addrMax :: Addr
@@ -90,6 +108,64 @@ addrMin = 0
 
 -- Make memory from a list of doubles
 newMemory :: [Double] -> IO Memory
-newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0)
+newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0.0)
 
 data World = World ProgramCounter StatusR Ports Instructions Memory
+
+
+data SOper =  Noop
+            | Cmpz
+            | Sqrt
+            | Copy
+            | Input
+            | End -- pseudo instruction, means remaining instructions are all
+                  -- Noops; this won't appear in .obf files, it's just an
+                  -- optimization.
+    deriving (Ord, Eq, Show)
+
+data SType = SType SOper Imm Addr
+    deriving (Ord, Eq, Show)
+
+-- The from/to enum is the opcode, as specified in the problem specification
+instance Enum SOper where
+    fromEnum Noop  = 1
+    fromEnum Cmpz  = 2
+    fromEnum Sqrt  = 3
+    fromEnum Copy  = 4
+    fromEnum Input = 5
+
+    toEnum 0 = Noop
+    toEnum 1 = Cmpz
+    toEnum 2 = Sqrt
+    toEnum 3 = Copy
+    toEnum 4 = Input
+    toEnum x = error $ " unexpected SOper " ++ (show x)
+
+-- These are operations that require two source registers, as specified in Table
+-- 1 of the problem specification
+data DOper =  Add
+            | Sub
+            | Mult
+            | Div
+            | Output
+            | Phi 
+            deriving (Show, Eq, Ord)
+
+-- The from/to enum is the opcode, as specified in the problem specification
+instance Enum DOper where
+    fromEnum Add    = 1
+    fromEnum Sub    = 2
+    fromEnum Mult   = 3
+    fromEnum Div    = 4
+    fromEnum Output = 5
+    fromEnum Phi    = 6
+
+    toEnum 1 = Add
+    toEnum 2 = Sub
+    toEnum 3 = Mult
+    toEnum 4 = Div
+    toEnum 5 = Output
+    toEnum 6 = Phi
+
+data DType = DType DOper Addr Addr
+    deriving (Ord, Eq, Show)

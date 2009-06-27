@@ -8,11 +8,11 @@ import Data.ByteString.Lazy (fromChunks)
 
 import TeamCA.Machine.SType (SType(..))
 import TeamCA.Machine.DType (DType(..))
+import TeamCA.Machine.Types
 import TeamCA.Machine.Util
 
-type Instruction = Either SType DType
 
-decodeInstruction :: Word32 -> Instruction
+decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w
     | oper == 0 = Left  $ SType (toEnum oper') (toEnum imm) lAddr'
     | otherwise = Right $ DType (toEnum oper) hAddr' lAddr'
@@ -46,13 +46,13 @@ decodeIEEE exponentBits significandBits n = encodeFloat significand exponent
 getDoubleIEEEle :: Get Double
 getDoubleIEEEle = fmap word64ToDouble getWord64le
 
-getInstruction :: Get Instruction
+getInstruction :: Get (Either SType DType)
 getInstruction = fmap decodeInstruction getWord32le
 
 readOBF :: FilePath -> IO OBF
 readOBF = decodeFile
 
-data OBF = OBF [Word32] [Double]
+data OBF = OBF [Instruction] [Double]
 
 instance Binary OBF where
     put a = undefined
@@ -65,11 +65,11 @@ instance Binary OBF where
                     if ((b `div` 12) `mod` 2) == 0
                         then do
                                 datum <- getDoubleIEEEle
-                                instr <- getWord32le
+                                instr <- getInstruction
                                 obf @(OBF instrs datas) <- get
                                 return $ OBF (instr : instrs) (datum : datas)
                         else do
-                                instr <- getWord32le
+                                instr <- getInstruction
                                 datum <- getDoubleIEEEle
                                 obf @(OBF instrs datas) <- get
                                 return $ OBF (instr : instrs) (datum : datas)

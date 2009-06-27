@@ -4,7 +4,8 @@ module TeamCA.Machine.SType
             , Cmpz
             , Sqrt
             , Copy
-            , Input )
+            , Input
+            , End )
     ) where
 
 import TeamCA.Machine.Types
@@ -14,6 +15,9 @@ data SOper =  Noop
             | Sqrt
             | Copy
             | Input
+            | End -- pseudo instruction, means remaining instructions are all
+                  -- Noops; this won't appear in .obf files, it's just an
+                  -- optimization.
  
 data SType = SType SOper Imm Addr
 

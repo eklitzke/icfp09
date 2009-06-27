@@ -11,10 +11,14 @@ module TeamCA.Machine.Types
     , ProgramCounter
     , StatusR (On, Off)
     , World(World)
+    , readPort
+    , writePort
     ) where
 
+import Prelude hiding (lookup)
 import Data.Array.Unboxed
 import Data.Array.IO
+import Data.Map
 import Data.Word
 
 
@@ -50,5 +54,19 @@ type Instructions = UArray Addr Word32
  
 -- Memory is mutable
 type Memory = IOArray Addr Double
- 
-data World = World ProgramCounter StatusR Instructions Memory
+
+type Ports = Map Int Double
+
+writePort :: Int -> Double -> Ports -> Ports
+writePort = insert
+
+readPort :: Int -> Ports -> Double
+readPort k m = case lookup k m of
+                 Nothing -> error ("failed to read from port " ++ (show k))
+                 Just v -> v
+
+-- |Create a new set of input ports with configuration value c.
+newPorts :: Double -> Ports
+newPorts c = fromList [(0x2, 0.0), (0x3, 0.0), (0x3e80, c)]
+
+data World = World ProgramCounter StatusR Ports Instructions Memory

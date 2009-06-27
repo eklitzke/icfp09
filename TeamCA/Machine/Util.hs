@@ -29,7 +29,9 @@ extractLower w = fromPair (hi, lo)
 extractOpImm :: Int -> (Int, Int)
 extractOpImm w
     | w >= 0x4000 = error ("Invalid OpImm value: " ++ (show w))
-    | otherwise   = fromPair (op, imm)
+    | otherwise   = if op > 5
+                        then error ("bad op " ++ show op)
+                        else fromPair (op, imm)
     where
-      op = (w .&. 0x3c0) `shiftR` 10
+      op = w `shiftR` 10
       imm = w .&. 0x3ff

@@ -1,6 +1,11 @@
+CABAL = cabal
 
 all:
-	echo hello world
+	$(CABAL) configure
+	$(CABAL) build
+
+clean:
+	-rm -rf dist
 
 test:
 	echo testing

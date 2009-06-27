@@ -6,11 +6,13 @@ module TeamCA.Machine.Types
           , EQZ
           , GEZ
           , GTZ )
+    , Instruction
     , Instructions
     , Memory
     , ProgramCounter
     , StatusR (On, Off)
     , World(World)
+    , newPorts
     , readPort
     , writePort
     , newMemory
@@ -72,7 +74,7 @@ type ProgramCounter = Addr
 type Instruction = Either SType DType
 
 -- The instruction set is immutable
-type Instructions = UArray Addr Instruction
+type Instructions = Array Addr Instruction
 
 -- Memory is mutable
 type Memory = IOArray Addr Double
@@ -96,7 +98,7 @@ emptyPorts = fromList []
 
 -- Make an instruction array from a list of word32 instructions
 mkInstructions :: [Instruction] -> Instructions
-mkInstructions is = listArray (addrMin, addrMax) is --(is ++ [Left $ SType End undefined undefined])
+mkInstructions is = listArray (addrMin, addrMax) (is ++ [Left $ SType End undefined undefined])
 
 -- The max address
 addrMax :: Addr

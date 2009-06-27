@@ -1,36 +1,33 @@
-module TeamCA.Machine ( step ) where
+module TeamCA.Machine ( 
+    step
+    , run
+    ) where
 
-import Data.Word
-import Data.IORef
 
 import Data.Array.Unboxed
 import Data.Array.IO
-
+import Data.Binary
+import Data.Binary.Get
+import qualified Data.ByteString
+import Data.ByteString.Lazy (fromChunks)
+import Data.IORef
+import Data.Word
+import System.IO
+import TeamCA.Machine.Codec
 import TeamCA.Machine.DType
 import TeamCA.Machine.SType
 import TeamCA.Machine.Types
 import TeamCA.Machine.Util
- 
+
 -- Stepping through a single instruction is a function like World -> IO
 -- World. The new world has an incremented ProgramCounter, and shares the same
 -- reference to an Instruction array and Memory array. Since the memory array is
 -- mutable, the old world shouldn't be used anymore (since its memory contents
 -- will reflect the new state of the world).
 
-decodeWord :: Word32 -> Either SType DType
-decodeWord w
-    | oper == 0 = Left  $ SType (toEnum oper') (toEnum imm) lAddr'
-    | otherwise = Right $ DType (toEnum oper) hAddr' lAddr'
-    where
-      oper = extractOper w
-      (hAddr, lAddr) = extractLower w
-      (oper', imm) = extractOpImm hAddr
-      hAddr' = fromIntegral hAddr
-      lAddr' = fromIntegral lAddr
-
 -- Read an instruction from a specified address
 readText :: Instructions -> Addr -> Either SType DType
-readText is addr = decodeWord (is ! addr)
+readText is addr = decodeInstruction (is ! addr)
 
 readData :: Memory -> Addr -> IO Double
 readData is addr = readArray is addr
@@ -86,3 +83,11 @@ step (World pc sr ports is ms) = do
                              v2 <- readData ms r2
                              writeData (mut v1 v2)
       writeData v = writeArray ms pc v
+
+-- Run a .obf in the simulator
+run filename = do
+    bs <- Data.ByteString.readFile filename
+    let (instructions, datas) = runGet getInstructionsAndData $ fromChunks [bs]
+    hPutStrLn stderr $ "read instrs:" ++ (show $ length instructions) ++ ", datas: " ++ (show $ length datas)
+    hPutStrLn stderr $ "ds" ++ (show datas)
+

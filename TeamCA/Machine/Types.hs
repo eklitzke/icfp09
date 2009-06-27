@@ -49,6 +49,7 @@ instance Enum Imm where
 -- The program counter
 type ProgramCounter = Addr
  
+
 -- The instruction set is immutable
 type Instructions = UArray Addr Word32
  

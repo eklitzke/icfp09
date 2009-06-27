@@ -66,7 +66,7 @@ step (World pc sr is ms) = do
                                   Off -> return $ readData ms r2
                                 writeData val
   srVal <- readIORef sr'
-  return World (pc+1) srVal is ms
+  return $ World (pc+1) srVal is ms
     where
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2

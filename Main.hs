@@ -18,7 +18,7 @@ main = do
 run filename = do
     bs <- BS.readFile filename
     let (instructions, datas) = runGet getInstructionsAndData $ fromChunks [bs]
-    hPutStrLn stderr "read"
+    hPutStrLn stderr $ "read instrs:" ++ (show $ length instructions) ++ ", datas: " ++ (show $ length datas)
 
 getInstructionsAndData :: Get ([Word32], [Word64])
 getInstructionsAndData = do
@@ -29,13 +29,13 @@ getInstructionsAndData = do
                 b <- bytesRead
                 if ((b `div` 96) `mod` 2) == 0
                     then do
-                            instr <- getWord32le
                             datum <- getWord64le
+                            instr <- getWord32le
                             (instrs, datas) <- getInstructionsAndData
                             return $ (instr : instrs, datum : datas)
                     else do
-                            datum <- getWord64le
                             instr <- getWord32le
+                            datum <- getWord64le
                             (instrs, datas) <- getInstructionsAndData
                             return $ (instr : instrs, datum : datas)
 

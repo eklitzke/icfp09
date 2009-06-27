@@ -16,3 +16,6 @@ Library
   Build-Depends:  array
                 , base
                 , binary
+
+Executable vm
+    main-is:      Main.hs

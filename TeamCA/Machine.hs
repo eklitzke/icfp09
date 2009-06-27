@@ -40,7 +40,7 @@ step (World pc sr is ms) = do
   let instr = readText is pc
   sr' <- newIORef sr
   case instr of
-    Left (SType Noop _ _) -> ()
+    Left (SType Noop _ _) -> return ()
     Left (SType Cmpz imm r) -> do v <- readData ms r
                                   let sr'' = case imm of
                                            LTZ -> r < 0
@@ -64,7 +64,7 @@ step (World pc sr is ms) = do
                                   On  -> return $ readData ms r1
                                   Off -> return $ readData ms r2
   srVal <- readIORef sr'
-  return World (pc+1) srVal is ms
+  return $ World (pc+1) srVal is ms
     where
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2

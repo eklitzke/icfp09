@@ -60,14 +60,14 @@ step (World pc sr is ms) = do
     Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
     Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
     Right (DType Output _ _) -> error "Output not implemented"
-    Right (DType Phi  r1 r2) -> writeData $ case sr of
-                                  On  -> return $ readData ms r1
-                                  Off -> return $ readData ms r2
+    Right (DType Phi  r1 r2) -> do v <- (case sr of
+                                       On  -> readData ms r1
+                                       Off -> readData ms r2)
+                                   writeData v
   srVal <- readIORef sr'
-  return $ World (pc+1) srVal is ms
+  return $ World (pc + 1) srVal is ms
     where
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2
                              writeData (mut v1 v2)
-      
       writeData v = writeArray ms sr v

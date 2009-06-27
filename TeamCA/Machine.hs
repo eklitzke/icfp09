@@ -32,8 +32,8 @@ decodeWord w
 readText :: Instructions -> Addr -> Either SType DType
 readText is addr = decodeWord (is ! addr)
 
-readData :: Memory -> Addr -> Double
-readData is addr = is ! addr
+readData :: Memory -> Addr -> IO Double
+readData is addr = readArray is addr
 
 step :: World -> IO World
 step (World pc sr is ms) = do

@@ -1,12 +1,8 @@
-{-# LANGUAGE FlexibleInstances #-}
+module TeamCA.Machine.Codec where
 
-module TeamCA.Machine.Codec where 
-    
 import Data.Binary
 import Data.Bits
-import Control.Monad (liftM) 
 import Data.Binary.Get
-import Data.Word
 import qualified Data.ByteString
 import Data.ByteString.Lazy (fromChunks)
 
@@ -48,19 +44,19 @@ decodeIEEE exponentBits significandBits n = encodeFloat significand exponent
 
 -- Get a IEEE Double
 getDoubleIEEEle :: Get Double
-getDoubleIEEEle = liftM word64ToDouble getWord64le
+getDoubleIEEEle = fmap word64ToDouble getWord64le
 
 getInstruction :: Get Instruction
-getInstruction = liftM decodeInstruction getWord32le 
+getInstruction = fmap decodeInstruction getWord32le
 
 readOBF :: FilePath -> IO OBF
-readOBF = decodeFile 
+readOBF = decodeFile
 
 data OBF = OBF [Word32] [Double]
 
 instance Binary OBF where
     put a = undefined
-    get = do 
+    get = do
         e <- isEmpty
         if e
             then return $ OBF [] []

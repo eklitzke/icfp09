@@ -18,8 +18,10 @@ data SOper =  Noop
             | End -- pseudo instruction, means remaining instructions are all
                   -- Noops; this won't appear in .obf files, it's just an
                   -- optimization.
- 
+    deriving (Ord, Eq, Show)
+
 data SType = SType SOper Imm Addr
+    deriving (Ord, Eq, Show)
 
 -- The from/to enum is the opcode, as specified in the problem specification
 instance Enum SOper where
@@ -29,8 +31,10 @@ instance Enum SOper where
     fromEnum Copy  = 4
     fromEnum Input = 5
 
-    toEnum 1 = Noop
-    toEnum 2 = Cmpz
-    toEnum 3 = Sqrt
-    toEnum 4 = Copy
-    toEnum 5 = Input
+    toEnum 0 = Noop
+    toEnum 1 = Cmpz
+    toEnum 2 = Sqrt
+    toEnum 3 = Copy
+    toEnum 4 = Input
+    toEnum x = error $ " unexpected SOper " ++ (show x)
+

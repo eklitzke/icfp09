@@ -17,7 +17,8 @@ data DOper =  Add
             | Mult
             | Div
             | Output
-            | Phi deriving (Show, Eq, Ord)
+            | Phi 
+            deriving (Show, Eq, Ord)
 
 -- The from/to enum is the opcode, as specified in the problem specification
 instance Enum DOper where
@@ -37,3 +38,4 @@ instance Enum DOper where
 
 
 data DType = DType DOper Addr Addr
+    deriving (Ord, Eq, Show)

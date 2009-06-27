@@ -1,6 +1,8 @@
 module TeamCA.Machine (
-    step
-    , run
+      step
+    , readWorld
+    , runWorld
+    , updateWorld
     ) where
 
 
@@ -84,6 +86,19 @@ step (World pc sr ports is ms) = do
                              writeData (mut v1 v2)
       writeData v = writeArray ms pc v
 
+runWorld :: World -> IO World
+runWorld w = do
+  w' <- step w
+  loop w
+  where
+    loop n@(World pc _ _ _ _)
+        | pc == 0  = return n
+        | otherwise = do n' <- step n
+                         loop n'
+
+updateWorld :: World -> (Ports -> Ports) -> World
+updateWorld (World pc sr ports is ms) f = World pc sr (f ports) is ms
+
 -- Convert an OBF to a World
 obfToWorld :: OBF -> IO World
 obfToWorld (OBF is ds) = do
@@ -92,14 +107,13 @@ obfToWorld (OBF is ds) = do
     return $ World 0 Off (newPorts 1001) instrs memory
 
 -- Run an .obf
-run :: FilePath -> IO ()
-run filename = do
+readWorld :: FilePath -> IO World
+readWorld filename = do
     obf @ (OBF instructions datas) <- readOBF filename
     hPutStrLn stderr $ "Read the this many instructions:" ++ (show . length $ instructions)
     hPutStrLn stderr $ "Read the this many data:" ++ (show . length $ datas)
-    hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
-    hPutStrLn stderr $ "Read the following data: " ++ (show datas)
+    --hPutStrLn stderr $ "Read the following instructions:" ++ (show instructions)
+    --hPutStrLn stderr $ "Read the following data: " ++ (show datas)
     world <- obfToWorld obf
-    return ()
-
+    return world
 

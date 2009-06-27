@@ -11,6 +11,7 @@ module TeamCA.Machine.Types
     , Memory
     , ProgramCounter
     , StatusR (On, Off)
+    , Ports
     , World(World)
     , newPorts
     , readPort
@@ -117,6 +118,9 @@ newMemory :: [Double] -> IO Memory
 newMemory doubles = newListArray (addrMin, addrMax) (doubles ++ repeat 0.0)
 
 data World = World ProgramCounter StatusR Ports Instructions Memory
+
+instance Show World where
+    show (World pc sr ports is ms) = "World(pc=" ++ show pc ++ " ports=" ++ show (toList ports) ++ " instrs=" ++ show (bounds is) ++ ")"
 
 
 data SOper =  Noop

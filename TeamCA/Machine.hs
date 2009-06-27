@@ -85,5 +85,4 @@ step (World pc sr ports is ms) = do
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2
                              writeData (mut v1 v2)
-      
       writeData v = writeArray ms pc v

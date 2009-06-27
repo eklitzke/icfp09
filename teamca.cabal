@@ -17,6 +17,7 @@ Library
                 , base
                 , binary
                 , containers
+                , bytestring
 
 Executable vm
     main-is:      Main.hs

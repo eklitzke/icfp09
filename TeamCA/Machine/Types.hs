@@ -92,7 +92,7 @@ showReg x = "r[" ++ show x ++ "]"
 
 showInstruction :: Instruction -> String
 showInstruction (Left (SType Noop _ _)) = "NOOP"
-showInstruction (Left (SType Cmpz imm r)) = "CMPZ " ++ show imm ++ showReg r
+showInstruction (Left (SType Cmpz imm r)) = "CMPZ " ++ show imm ++ " " ++ showReg r
 showInstruction (Left (SType Sqrt _ r)) = "SQRT " ++ showReg r
 showInstruction (Left (SType Copy _ r)) = "COPY " ++ showReg r
 showInstruction (Left (SType Input _ r)) = "INPUT " ++ showReg r
@@ -127,7 +127,7 @@ emptyPorts = Data.Map.empty
 
 -- Make an instruction array from a list of word32 instructions
 mkInstructions :: [Instruction] -> Instructions
-mkInstructions is = listArray (addrMin, addrMax) (is ++ [Left $ SType End LTZ 0])
+mkInstructions is = listArray (0, fromIntegral $ length is) (is ++ [Left $ SType End LTZ 0])
 
 -- The max address
 addrMax :: Addr

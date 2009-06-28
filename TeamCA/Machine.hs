@@ -51,10 +51,9 @@ step (World pc sr iports oports is ms) = do
                                            GTZ -> r > 0
                                   writeIORef sr' (if sr'' then On else Off)
     Left (SType Sqrt _ r) -> do v <- readData ms r
-                                --print $ "sqrt " ++ (show v)
                                 let v' = sqrt v
                                 if isNaN v'
-                                   then error "vm error: sqrt NaN"
+                                   then error $ "vm error: sqrt NaN on instruction " ++ show instr
                                    else writeData (sqrt v)
     Left (SType Copy _ r) -> do v <- readData ms r
                                 writeData v
@@ -64,7 +63,10 @@ step (World pc sr iports oports is ms) = do
     Right (DType Add  r1 r2) -> rHelper r1 r2 (+)
     Right (DType Sub  r1 r2) -> rHelper r1 r2 (-)
     Right (DType Mult r1 r2) -> rHelper r1 r2 (*)
-    Right (DType Div  r1 r2) -> rHelper r1 r2 (/)
+    Right (DType Div  r1 r2) -> do v2 <- readData ms r2
+                                   if v2 == 0
+                                      then writeData 0
+                                      else rHelper r1 r2 (/)
     Right (DType Output r1 r2) -> do v <- readData ms r2
                                      let r1' = fromIntegral r1
                                      writeIORef oports' (writePort r1' v oports)

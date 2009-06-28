@@ -69,7 +69,7 @@ decodeInstruction w
 
       hi14 = (w .&. mask28) `shiftR` 14 -- upper 14 bits from the lower 28, i.e. bits 14-27
       lo14 = w .&. mask14               -- lower 14 bits, i.e. bits 0-13
-      mid10 = hi14 .&. (ones 10)
+      mid10 = hi14 .&. (ones 10)        -- lower 10 bits from lo14
 
       sop = toEnum $ fromIntegral $ hi14 `shiftR` 10 -- the high 4 bits from hi14
       imm = toEnum $ fromIntegral $ mid10 `shiftR` 6 -- the imm value

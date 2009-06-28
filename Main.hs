@@ -13,7 +13,6 @@ runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
   world <- readWorld fp cfg
   run world
-  return ()
   where
     run w = do 
         w' <- runWorld w
@@ -28,7 +27,8 @@ main = do
   putStrLn "-= ICFP'09 Sim =-"
   args <- getArgs
   s <- S1.newRealStrategy 
-  case args of
-    [] -> error "expecting a file"
-    [obfName, config] -> do let cfg = read config :: Int
-                            runSimulator obfName cfg s
+  if length args /= 2
+      then error "usage: vm <obf file> <configuration>"
+      else let [obfName, config] = args in
+           let cfg = read config :: Int in
+           runSimulator obfName cfg  s

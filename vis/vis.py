@@ -150,6 +150,8 @@ class PyGtkWidget(gtk.Widget):
 				radius = dim * obj['R'] / self.universe_size / 2
 				set_rgba(obj)
 				cr.arc(x, y, radius, 0, 2 * math.pi)
+				if obj.get('fill', False):
+					cr.fill()
 
 			# A point has required attribs x, y
 			elif obj['shape'] == 'dot':

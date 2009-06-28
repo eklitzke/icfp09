@@ -25,6 +25,6 @@ if __name__ == '__main__':
 		output.append({'shape': 'dot', 'x': data['oPos'][0], 'y': data['oPos'][1], 'r': 1, 'b': 0, 'g': 0, 'note': 'satellite'})
 
 		# Draw the earth as a blue circle at (0, 0), with a black dot at the origin
-		output.append({'shape': 'circle', 'R': 6.357e6, 'x': 0, 'y': 0, 'b': 1, 'r': 0, 'g': 0, 'note': 'earth'})
-		output.append({'shape': 'dot', 'x': 0, 'y': 0, 'b': 0, 'r': 0, 'g': 0, 'note': 'origin'})
+		output.append({'shape': 'circle', 'R': 6.357e6, 'x': 0, 'y': 0, 'b': 1, 'r': 0, 'g': 0, 'fill': True, 'note': 'earth'})
+		output.append({'shape': 'dot', 'x': 0, 'y': 0, 'b': 0, 'r': 0, 'g': 0, 'note': 'origin', 'alpha': 1.0})
 		outfile.write(simplejson.dumps(output) + '\n')

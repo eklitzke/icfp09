@@ -47,8 +47,8 @@ class PyGtkWidget(gtk.Widget):
 				self.epoch = 0
 			return True
 
-		#self.timer = gobject.timeout_add(1000, progress_timeout, self)
-		gobject.timeout_add(50, progress_timeout, self)
+		# Draw the simulation at 24 fps
+		gobject.timeout_add(1000 / 24.0, progress_timeout, self)
 
 		json_data = open('icfp.json').read()
 		lines = [simplejson.loads(line) for line in json_data.split('\n') if line]

@@ -44,11 +44,11 @@ step (World pc sr iports oports is ms) = do
     Left (SType Noop _ _)   -> return ()
     Left (SType Cmpz imm r) -> do v <- readData ms r
                                   let sr'' = case imm of
-                                           LTZ -> r < 0
-                                           LEZ -> r <= 0
-                                           EQZ -> r == 0
-                                           GEZ -> r >= 0
-                                           GTZ -> r > 0
+                                           LTZ -> v < 0
+                                           LEZ -> v <= 0
+                                           EQZ -> v == 0
+                                           GEZ -> v >= 0
+                                           GTZ -> v > 0
                                   writeIORef sr' (if sr'' then On else Off)
     Left (SType Sqrt _ r) -> do v <- readData ms r
                                 let v' = sqrt v

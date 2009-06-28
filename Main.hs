@@ -13,13 +13,13 @@ import TeamCA.Strategies.Types (store, next)
 runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
   world@(World _ _ _ _ is ms) <- readWorld fp cfg
-  putStrLn $ "INSTRUCTIONS =\n" ++ showProgram is
-  print world
+  --putStrLn $ "INSTRUCTIONS =\n" ++ showProgram is
+  --print world
   runSim world
   where
     runSim w = do 
       w' <- runWorld w
-      print w'
+      --print w'
       isDone <- store strat (outputPorts w')
       if isDone 
          then return ()

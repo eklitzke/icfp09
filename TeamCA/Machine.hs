@@ -97,8 +97,8 @@ runWorld w = do
         | otherwise = do n' <- step n
                          loop n'
 
-updateWorld :: World -> (Ports -> Ports) -> World
-updateWorld (World pc sr iports oports is ms) f = World pc sr (f oports) oports is ms
+updateWorld :: World -> InputPorts -> World
+updateWorld (World pc sr iports oports is ms) iports' = World pc sr iports' oports is ms
 
 -- Convert an OBF to a World
 obfToWorld :: OBF -> Int -> IO World

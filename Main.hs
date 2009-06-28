@@ -3,28 +3,26 @@ module Main where
 import System.Environment (getArgs)
 
 import TeamCA.Machine.Types
+import TeamCA.Strategies.Types (Strategy)
 import TeamCA.Machine
 import Data.Map
 import qualified TeamCA.Strategies.S1 as S1
+import TeamCA.Strategies.Types (store, next, isDone)
 
-runSimulator :: FilePath -> Int -> (Ports -> Ports) -> IO ()
-runSimulator fp cfg mut = do
+runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
+runSimulator fp cfg strat = do
   world <- readWorld fp cfg
   run world
   return ()
   where
-    run w = do w' <- runWorld w
-               print $ S1.output w'
-               run $ updateWorld w' mut
-
--- ACCELERATE
-strategy :: Ports -> Ports
-strategy p0 = pf
-    where
-      p1 = insert 2 0.1 p0
-      p2 = insert 3 0.1 p1
-      pf = p2
-
+    run w = do 
+        w' <- runWorld w
+        store strat (outputPorts w)
+        if isDone strat 
+            then return ()
+            else do
+                inputPorts <- next strat 
+                run $ updateWorld w' inputPorts
 
 main = do
   putStrLn "-= ICFP'09 Sim =-"
@@ -32,4 +30,4 @@ main = do
   case args of
     [] -> error "expecting a file"
     [obfName, config] -> do let cfg = read config :: Int
-                            runSimulator obfName cfg strategy
+                            runSimulator obfName cfg S1.defaultStrategy

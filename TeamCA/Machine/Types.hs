@@ -21,6 +21,8 @@ module TeamCA.Machine.Types
     , mkInstructions
     , outputPorts
     , inputPorts
+    , InputPorts
+    , OutputPorts
 
     -- SType
     , SType(SType)
@@ -42,6 +44,7 @@ module TeamCA.Machine.Types
     -- Solutions
     , Frame(..)
     , Solution(..)
+
     ) where
 
 import Prelude hiding (lookup)

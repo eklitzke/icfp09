@@ -24,6 +24,9 @@ reduceFrames (x@(Frame _ p1) : (x'@(Frame _ p2) : xs))
     | p1 == p2 = reduceFrames $ x : xs
     | otherwise = x : (reduceFrames $ x' : xs)
 
+
+
+
 instance Binary Solution where
     put (Solution team scenario frames) = do
         putWord32le . fromIntegral $ 0xCAFEBABE
@@ -46,18 +49,32 @@ writeSolution = encodeFile
 
 putIEEE754le val = putWord64le . doubleToWord64 $ val
 
+-- A number with n one digits
+
+
+
 decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w
-    | oper == 0 = Left  $ SType sop imm saddr
-    | otherwise = Right $ DType dop daddr1 daddr2
+    | oper == 0 = Left  $ SType sop imm loReg
+    | otherwise = Right $ DType dop hiReg loReg
     where
-      oper = fromIntegral $ shiftR w 28
+      mask28 = ones 28
+      mask14 = ones 14
+
+      oper = fromIntegral $ shiftR w 28 -- the upper 4 bits
       dop = toEnum $ oper -- the upper 4 bits
-      daddr1 = fromIntegral $ shiftR (shiftL w 4) 22 -- the upper half of the lower 28 bits
-      daddr2 = fromIntegral $ shiftR (shiftL w 18) 18 -- the lower 14 bits
-      sop = toEnum $ fromIntegral $ shiftR (shiftL w 4) 28 -- the lower half of the upper 8 bits
-      imm = toEnum $ fromIntegral $ shiftR (shiftL w 8) 29 -- the first 3 bits after the upper 8 bits
-      saddr = fromIntegral $ shiftR (shiftL w 18) 18 -- the lower 14 bits
+
+      hiReg = fromIntegral hi14
+      loReg = fromIntegral lo14
+
+      hi14 = (w .&. mask28) `shiftR` 14 -- upper 14 bits from the lower 28, i.e. bits 14-27
+      lo14 = w .&. mask14               -- lower 14 bits, i.e. bits 0-13
+      mid10 = hi14 .&. (ones 10)
+
+      sop = toEnum $ fromIntegral $ hi14 `shiftR` 10 -- the high 4 bits from hi14
+      imm = toEnum $ fromIntegral $ mid10 `shiftR` 6 -- the imm value
+
+      ones n = (1 `shiftL` n) - 1
     
 word64ToDouble :: Word64 -> Double
 word64ToDouble = decodeIEEE 11 52

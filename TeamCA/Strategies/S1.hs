@@ -25,7 +25,8 @@ instance Strategy RealStrategy where
         let output = toOutput outputPorts
         print output
         outputs <- readIORef $ sOutputs strategy
-        writeIORef (sOutputs strategy) [output]
+        let outputs' = take 5 $ output : outputs
+        writeIORef (sOutputs strategy) outputs'
         return $ (oScore output) /= 0
    
     next strategy = do 
@@ -34,9 +35,11 @@ instance Strategy RealStrategy where
         let origInput = newPorts 1001
         if num > 1
             then do 
+                print "coast"
                 return origInput
             else do 
-                return $ writePort 3 0.1 $ writePort 2 0.1 origInput
+                print "boost!"
+                return $ writePort 3 1.0 $ writePort 2 0.0 origInput
 
 data Output = Output { 
     oScore :: Double,

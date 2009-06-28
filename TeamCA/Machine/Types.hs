@@ -111,7 +111,7 @@ emptyPorts = Data.Map.empty
 
 -- Make an instruction array from a list of word32 instructions
 mkInstructions :: [Instruction] -> Instructions
-mkInstructions is = listArray (addrMin, addrMax) (is ++ [Left $ SType End undefined undefined])
+mkInstructions is = listArray (addrMin, addrMax) (is ++ [Left $ SType End LTZ 0])
 
 -- The max address
 addrMax :: Addr

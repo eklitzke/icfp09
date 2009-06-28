@@ -11,6 +11,8 @@ import TeamCA.Strategies.Types (store, next)
 
 runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
+  print "inital cfg"
+  print cfg
   world <- readWorld fp cfg
   run world
   where

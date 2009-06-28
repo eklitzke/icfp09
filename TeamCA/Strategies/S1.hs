@@ -14,17 +14,17 @@ data EmptyStrategy = EmptyStrategy
 instance Strategy EmptyStrategy where
     next s o = return $ Just $ newPorts 1001
 
-data RealStrategy = RealStrategy {
+data HohmannTransfer = HohmannTransfer {
     sOutputs :: IORef [Output],
     sStartAngle :: IORef (Maybe Double)
 }
 
-newRealStrategy = do 
+newHohmannTransfer = do 
     s <- newIORef [] 
     a <- newIORef Nothing
-    return $ RealStrategy s a
+    return $ HohmannTransfer s a
     
-instance Strategy RealStrategy where
+instance Strategy HohmannTransfer where
     next strategy outputPorts = do 
           saveOutput  
           if oScore output /= 0 
@@ -59,7 +59,34 @@ instance Strategy RealStrategy where
             setStartAngle currAngle
             --print "Initial boost position:"
             --printPosition
-            return $ writePort 3 adj origInput
+            (x, y) <- getBoostXY 
+            return $ writePort 2 x $ writePort 3 y origInput
+
+        getBoostXY :: IO (Double, Double)
+        getBoostXY = return (0.0, -2500.0)
+
+        velocity :: IO (Double, Double)
+        velocity = do 
+            outputs <- getOutputs
+            let i = head outputs
+            let j = head . tail $ outputs
+            let k = onVector2 (-) (oPos i) (oPos j)
+            if length outputs < 2
+                then return (0.0, 0.0)
+                else return k
+
+        acceleration :: IO (Double, Double)
+        acceleration = do 
+            outputs <- getOutputs
+            let i = head outputs
+            let j = head . tail $ outputs
+            let k = head . tail . tail $ outputs
+            let m = onVector2 (-) (oPos i) (oPos j)
+            let n = onVector2 (-) (oPos j) (oPos k)
+            let o = onVector2 (-) m n 
+            if length outputs < 3
+                then return (0, 0)
+                else return o
 
         printPosition :: IO ()
         printPosition = do 
@@ -72,7 +99,7 @@ instance Strategy RealStrategy where
         nextInputPorts :: IO InputPorts
         nextInputPorts = do 
             outputs <- getOutputs
-            if length outputs == 1 
+            if length outputs == 2
                 then initialBoost
                 else do 
                     maybeAngle <- readIORef $ sStartAngle strategy
@@ -125,6 +152,3 @@ data S1 = S1 Int
 instance Scenario S1 where
    outputPortsToJSON scenario ports = encodeJSON . toOutput $ ports
    config (S1 i) = i
-
-
-

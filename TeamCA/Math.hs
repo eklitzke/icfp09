@@ -5,6 +5,8 @@ distOrigin = dist (0, 0)
 dist :: (Double, Double) -> (Double, Double) -> Double
 dist (x0, y0) (x1, y1) = sqrt $ (x1 - x0) ^ 2 + (y1 - y0) ^ 2
 
+onVector2 op (x0, y0) (x1, y1) = (x0 `op` x1, y0 `op` y1)
+
 toPolar :: (Double, Double) -> (Double, Double)
 toPolar (x, y) = (radius, degrees) 
     where 

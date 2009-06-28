@@ -55,7 +55,7 @@ data S = forall a. Strategy a => S a
 main = do
   putStrLn "-= ICFP'09 Sim =-"
   (opts, args) <- getArgs >>= parseOpts
-  s <- S1.newRealStrategy 
+  s <- S1.newHohmannTransfer 
   refMaybeTraceH <- newIORef Nothing
   let scenario = S1.S1 1001
   s' <- case optTrace opts of

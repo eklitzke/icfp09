@@ -17,7 +17,7 @@ runSimulator fp cfg strat = do
   where
     run w = do 
         w' <- runWorld w
-        store strat (outputPorts w)
+        store strat (outputPorts w')
         if isDone strat 
             then return ()
             else do

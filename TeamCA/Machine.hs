@@ -46,8 +46,8 @@ step (World pc sr iports oports is ms) = do
   sr' <- newIORef sr
   oports' <- newIORef oports
   pc' <- newIORef (pc + 1)
-  print pc
-  print instr
+  --print pc
+  --print instr
   case instr of
     Left (SType Noop _ _)   -> return ()
     Left (SType Cmpz imm r) -> do v <- readData ms r
@@ -59,8 +59,7 @@ step (World pc sr iports oports is ms) = do
                                            GTZ -> r > 0
                                   writeIORef sr' (if sr'' then On else Off)
     Left (SType Sqrt _ r) -> do v <- readData ms r
-                                print $ "sqrt " ++ (show v)
-                                writeData (sqrt v)
+                                --print $ "sqrt " ++ (show v)
                                 let v' = sqrt v
                                 if isNaN v'
                                    then error "vm error: sqrt NaN"

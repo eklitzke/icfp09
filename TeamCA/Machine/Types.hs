@@ -44,13 +44,16 @@ module TeamCA.Machine.Types
     -- Solutions
     , Frame(..)
     , Solution(..)
+    , showInstruction
+    , showProgram
 
     ) where
 
 import Prelude hiding (lookup)
 import Data.Array.Unboxed
 import Data.Array.IO
-import Data.Map hiding (elems)
+import Data.List (intersperse)
+import Data.Map hiding (elems, map)
 import Data.Word
 
 -- The status register
@@ -84,9 +87,20 @@ type ProgramCounter = Addr
 
 type Instruction = Either SType DType
 
+showReg :: Integral a => a -> String
+showReg x = "r[" ++ show x ++ "]"
+
 showInstruction :: Instruction -> String
-showInstruction (Left s) = show s
-showInstruction (Right d) = show d
+showInstruction (Left (SType Noop _ _)) = "NOOP"
+showInstruction (Left (SType Cmpz imm r)) = "CMPZ " ++ show imm ++ showReg r
+showInstruction (Left (SType Sqrt _ r)) = "SQRT " ++ showReg r
+showInstruction (Left (SType Copy _ r)) = "COPY " ++ showReg r
+showInstruction (Left (SType Input _ r)) = "INPUT " ++ showReg r
+showInstruction (Left (SType End _ r)) = "END"
+showInstruction (Right (DType i r1 r2)) = show i ++ " " ++ showReg r1 ++ " " ++ showReg r2
+
+showProgram :: Instructions -> String
+showProgram instrs = concat $ intersperse "\n" $ map showInstruction $ elems instrs
 
 -- The instruction set is immutable
 type Instructions = Array Addr Instruction

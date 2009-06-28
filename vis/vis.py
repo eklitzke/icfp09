@@ -50,11 +50,12 @@ class PyGtkWidget(gtk.Widget):
 		# Draw the simulation at 24 fps
 		gobject.timeout_add(1000 / 24.0, progress_timeout, self)
 
-		json_data = open('icfp.json').read()
-		lines = [simplejson.loads(line) for line in json_data.split('\n') if line]
-		self.universe_size = lines[0]['universe_size']
+		json_data = translate_json('hs.json')
+
+		self.universe_size = json_data[0]['universe_size']
 		print 'UNIVERSE SIZE = %1.3g' % self.universe_size
-		self.json_data = lines[1:]
+
+		self.json_data = json_data[1:]
 										   
 	def do_realize(self):
 		self.set_flags(self.flags() | gtk.REALIZED)
@@ -173,15 +174,38 @@ class PyGtkWidget(gtk.Widget):
 			return self._expose_gdk(event)
 		return self._expose_cairo(event, cr)
 
+def translate_json(fname, skip=20):
+	output = []
 
-json_data = open('icfp.json').read()
+	for i, line in enumerate(open(fname, 'r')):
+
+		data = simplejson.loads(line)
+
+		if not output:
+			output.append({'universe_size': data['oRadius'] * 1.3})
+
+		if skip and i % skip != 0:
+			continue
+
+		out = []
+
+		# Draw the target radius as a green circle
+		out.append({'shape': 'circle', 'R': data['oRadius'], 'x': 0, 'y': 0, 'r': 0, 'b': 0, 'g': 1, 'note': 'target radius'})
+
+		# Draw the satellite as a red dot
+		out.append({'shape': 'dot', 'x': data['oPos'][0], 'y': data['oPos'][1], 'r': 1, 'b': 0, 'g': 0, 'note': 'satellite'})
+
+		# Draw the earth as a blue circle at (0, 0), with a black dot at the origin
+		out.append({'shape': 'circle', 'R': 6.357e6, 'x': 0, 'y': 0, 'b': 1, 'r': 0, 'g': 0, 'fill': True, 'note': 'earth'})
+		out.append({'shape': 'dot', 'x': 0, 'y': 0, 'b': 0, 'r': 0, 'g': 0, 'note': 'origin', 'alpha': 1.0})
+		output.append(out)
+	return output
 
 win = gtk.Window()
 win.set_title("icfp'09 sim")
 win.connect('delete-event', gtk.main_quit)
 
 event_box = gtk.EventBox()
-event_box.connect("button_press_event", lambda w,e: win.set_decorated(not win.get_decorated()))
 
 win.add(event_box)
 

@@ -88,6 +88,17 @@ instance Strategy HohmannTransfer where
                 then return (0, 0)
                 else return o
 
+        -- the velocity component to begin the transit
+        hohBegin grav radius1 radius2 = 
+                sqrt (grav / radius1) * (-1.0 + sqrt (2 * radius2 / (radius1 + radius2)))
+
+        -- the velocity component to end the transit
+        hohEnd grav radius1 radius2 = 
+                sqrt (grav / radius2) * (1.0 - sqrt (2 * radius1 / (radius1 + radius2)))
+
+        -- the time it takes to make the transit between orbits
+        hohTime grav radius1 radius2 = pi * sqrt (((radius1 + radius2) ^ 3) / 8 * grav)
+
         printPosition :: IO ()
         printPosition = do 
             print output

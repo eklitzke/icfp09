@@ -5,6 +5,9 @@ import Data.IORef
 import TeamCA.Machine.Types (readPort, InputPorts, OutputPorts, outputPorts, inputPorts, Ports, newPorts, writePort)
 import TeamCA.Strategies.Types
 import TeamCA.Math
+import Text.JSON.Generic (encodeJSON)
+import Data.Data (Data)
+import Data.Typeable (Typeable)
 
 data EmptyStrategy = EmptyStrategy
 
@@ -107,7 +110,7 @@ data Output = Output {
     oFuel :: Double,
     oPos :: (Double, Double),
     oRadius :: Double
-} deriving (Ord, Eq, Show)
+} deriving (Typeable, Data, Ord, Eq, Show)
 
 toOutput oports = Output score fuel pos radius
     where 
@@ -116,3 +119,12 @@ toOutput oports = Output score fuel pos radius
           pos = (look 0x2, look 0x3)
           radius = look 0x4
           look key = readPort key oports
+
+data S1 = S1 Int
+
+instance Scenario S1 where
+   outputPortsToJSON scenario ports = encodeJSON . toOutput $ ports
+   config (S1 i) = i
+
+
+

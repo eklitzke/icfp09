@@ -27,8 +27,9 @@ main = do
   putStrLn "-= ICFP'09 Sim =-"
   args <- getArgs
   s <- S1.newRealStrategy 
+  let scenario = S1.S1 1001
   if length args /= 2
       then error "usage: vm <obf file> <configuration>"
       else let [obfName, config] = args in
            let cfg = read config :: Int in
-           runSimulator obfName cfg (TraceStrategy s)
+           runSimulator obfName cfg (TraceStrategy s scenario)

@@ -2,6 +2,9 @@ module TeamCA.Strategies.Types
     (
         Strategy
         , next
+        , Scenario
+        , outputPortsToJSON
+        , config
     ) where
 
 import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
@@ -12,3 +15,8 @@ import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
 
 class Strategy s where 
     next :: s -> OutputPorts -> IO (Maybe InputPorts)
+
+class Scenario s where
+    outputPortsToJSON :: s -> OutputPorts -> String
+    config :: s -> Int
+

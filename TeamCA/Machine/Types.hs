@@ -71,6 +71,8 @@ instance Enum Imm where
     toEnum 2 = EQZ
     toEnum 3 = GEZ
     toEnum 4 = GTZ
+    toEnum x = error $ "unexpected " ++ (show x)
+
     fromEnum LTZ = 0
     fromEnum LEZ = 1
     fromEnum EQZ = 2

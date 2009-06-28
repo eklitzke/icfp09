@@ -48,15 +48,17 @@ putIEEE754le val = putWord64le . doubleToWord64 $ val
 
 decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w
-    | oper == 0 = Left  $ SType (toEnum oper') (toEnum imm) lAddr'
-    | otherwise = Right $ DType (toEnum oper) hAddr' lAddr'
+    | oper == 0 = Left  $ SType sop imm saddr
+    | otherwise = Right $ DType dop daddr1 daddr2
     where
-      oper = extractOper w
-      (hAddr, lAddr) = extractLower w
-      (oper', imm) = extractOpImm hAddr
-      hAddr' = fromIntegral hAddr
-      lAddr' = fromIntegral lAddr
-
+      oper = fromIntegral $ shiftR w 28
+      dop = toEnum $ oper -- the upper 4 bits
+      daddr1 = fromIntegral $ shiftR (shiftL w 4) 22 -- the upper half of the lower 28 bits
+      daddr2 = fromIntegral $ shiftR (shiftL w 18) 18 -- the lower 14 bits
+      sop = toEnum $ fromIntegral $ shiftR (shiftL w 4) 28 -- the lower half of the upper 8 bits
+      imm = toEnum $ fromIntegral $ shiftR (shiftL w 8) 29 -- the first 3 bits after the upper 8 bits
+      saddr = fromIntegral $ shiftR (shiftL w 18) 18 -- the lower 14 bits
+    
 word64ToDouble :: Word64 -> Double
 word64ToDouble = decodeIEEE 11 52
 

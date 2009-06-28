@@ -27,10 +27,6 @@ import TeamCA.Machine.Util
 -- mutable, the old world shouldn't be used anymore (since its memory contents
 -- will reflect the new state of the world).
 
--- Read an instruction from a specified address
-readText :: Instructions -> Addr -> Either SType DType
-readText is addr = is ! addr
-
 readData :: Memory -> Addr -> IO Double
 readData is addr = readArray is addr
 
@@ -41,13 +37,11 @@ readData is addr = readArray is addr
 -- necessary).
 step :: World -> IO World
 step (World pc sr iports oports is ms) = do
-  let instr = readText is pc
+  let instr = is ! pc
   --putStrLn $ "step: instr = " ++ (show instr) ++ " pc = " ++ (show pc)
   sr' <- newIORef sr
   oports' <- newIORef oports
   pc' <- newIORef (pc + 1)
-  --print pc
-  --print instr
   case instr of
     Left (SType Noop _ _)   -> return ()
     Left (SType Cmpz imm r) -> do v <- readData ms r
@@ -66,7 +60,7 @@ step (World pc sr iports oports is ms) = do
                                    else writeData (sqrt v)
     Left (SType Copy _ r) -> do v <- readData ms r
                                 writeData v
-    Left (SType Input _ r) -> do let v = readPort (round $ fromIntegral r) iports
+    Left (SType Input _ r) -> do let v = readPort (fromIntegral r) iports
                                  writeData v
     Left (SType End _ _) -> writeIORef pc' 0
     Right (DType Add  r1 r2) -> rHelper r1 r2 (+)

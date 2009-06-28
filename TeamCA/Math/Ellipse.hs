@@ -14,10 +14,9 @@ type Position = (Double, Double)
 type Angle = Double
 type Orientation = Angle
 
--- axis. The focus is assumed to be at (0, 0).
 data Ellipse = Ellipse { orientation :: Orientation
                        , a :: Double
-                       , e:: Double
+                       , e :: Double
                        } deriving (Show, Eq)
 
 tolerance :: Double
@@ -78,4 +77,3 @@ paramEllipse theta p1 p2 = Ellipse theta a e
       p1' = reorient theta p1
       p2' = reorient theta p2
       (a, e) = paramEllipseNaive p1' p2'
-

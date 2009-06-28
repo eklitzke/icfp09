@@ -48,7 +48,7 @@ class PyGtkWidget(gtk.Widget):
 			return True
 
 		#self.timer = gobject.timeout_add(1000, progress_timeout, self)
-		gobject.timeout_add(1000, progress_timeout, self)
+		gobject.timeout_add(50, progress_timeout, self)
 
 		json_data = open('icfp.json').read()
 		lines = [simplejson.loads(line) for line in json_data.split('\n') if line]
@@ -115,7 +115,7 @@ class PyGtkWidget(gtk.Widget):
 		set_rgba = lambda obj: cr.set_source_rgba(get_red(obj), get_green(obj), get_blue(obj), get_alpha(obj))
 
 		x, y, w, h = self.allocation
-		print 'WIDTH = %r, HEIGHT = %r' % (w, h)
+		print 'epoch = %d, WIDTH = %r, HEIGHT = %r' % (self.epoch, w, h)
 
 		def scale(thing):
 			"""Scale an object to the correct placement on the buffer. This
@@ -135,8 +135,6 @@ class PyGtkWidget(gtk.Widget):
 
 			return min(w, h) * ratio
 
-		print 'scale 0 = %s' % (scale(0))
-
 		for obj in self.json_data[self.epoch]:
 			assert isinstance(obj, dict)
 			# A circle has required attribs x, y, r
@@ -145,8 +143,6 @@ class PyGtkWidget(gtk.Widget):
 
 			# translate y into cartesian coordinates
 			y = min(h, w) - scale(obj['y'])
-
-			print 'x, y = %s' % ((x, y),)
 
 			if obj['shape'] == 'circle':
 				radius = scale(obj['R'])

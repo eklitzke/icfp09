@@ -97,7 +97,7 @@ instance Strategy RealStrategy where
             return $ writePort 3 (-adj) origInput
 
 -- Booost Launch off value 
-adj = -2600.0
+adj = 5000.0
 
 oppositeRadian x = fixRad $ x + pi
 

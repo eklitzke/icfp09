@@ -2,7 +2,6 @@ module TeamCA.Strategies.Types
     (
         Strategy
         , next
-        , isDone
         , store
     ) where
 
@@ -14,6 +13,5 @@ import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
 
 class Strategy s where 
     next :: s -> IO InputPorts
-    store :: s -> OutputPorts -> IO ()
-    isDone :: s -> Bool
+    store :: s -> OutputPorts -> IO Bool
 

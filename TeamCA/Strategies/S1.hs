@@ -1,23 +1,42 @@
 module TeamCA.Strategies.S1  where
 
 import Data.Map (findWithDefault)
-
-import TeamCA.Machine.Types (readPort, outputPorts, inputPorts, Ports, newPorts)
+import Data.IORef
+import TeamCA.Machine.Types (readPort, outputPorts, inputPorts, Ports, newPorts, writePort)
 import TeamCA.Strategies.Types
 
 data EmptyStrategy = EmptyStrategy
 
 instance Strategy EmptyStrategy where
     store s oports = do
-        print "store"
-        print $ oports
-        print $ toOutput oports
-
-    isDone s = False
+        return False
     next s = return $ newPorts 1001
 
-defaultStrategy = EmptyStrategy
+data RealStrategy = RealStrategy {
+    sOutputs :: IORef [Output]
+}
 
+newRealStrategy = do 
+    s <- newIORef [] 
+    return $ RealStrategy s
+    
+instance Strategy RealStrategy where
+    store strategy outputPorts = do
+        let output = toOutput outputPorts
+        print output
+        outputs <- readIORef $ sOutputs strategy
+        writeIORef (sOutputs strategy) [output]
+        return $ (oScore output) /= 0
+   
+    next strategy = do 
+        outputs <- readIORef $ sOutputs strategy
+        let num = length outputs
+        let origInput = newPorts 1001
+        if num > 1
+            then do 
+                return origInput
+            else do 
+                return $ writePort 3 0.1 $ writePort 2 0.1 origInput
 
 data Output = Output { 
     oScore :: Double,

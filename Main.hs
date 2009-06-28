@@ -7,7 +7,7 @@ import TeamCA.Strategies.Types (Strategy)
 import TeamCA.Machine
 import Data.Map
 import qualified TeamCA.Strategies.S1 as S1
-import TeamCA.Strategies.Types (store, next, isDone)
+import TeamCA.Strategies.Types (store, next)
 
 runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
@@ -17,8 +17,8 @@ runSimulator fp cfg strat = do
   where
     run w = do 
         w' <- runWorld w
-        store strat (outputPorts w')
-        if isDone strat 
+        isDone <- store strat (outputPorts w')
+        if isDone 
             then return ()
             else do
                 inputPorts <- next strat 
@@ -27,7 +27,8 @@ runSimulator fp cfg strat = do
 main = do
   putStrLn "-= ICFP'09 Sim =-"
   args <- getArgs
+  s <- S1.newRealStrategy 
   case args of
     [] -> error "expecting a file"
     [obfName, config] -> do let cfg = read config :: Int
-                            runSimulator obfName cfg S1.defaultStrategy
+                            runSimulator obfName cfg s

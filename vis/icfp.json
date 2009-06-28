@@ -1,0 +1,6 @@
+{"universe_size": 5e7}
+[{"y": 0, "x": 0, "shape": "circle", "R": 8e6}, {"x": 0e7, "y": 0e7, "shape": "dot", "r": 1.0, "g": 0, "b": 0}]
+[{"y": 0, "x": 0, "shape": "circle", "R": 8e6}, {"x": 1e7, "y": 1e7, "shape": "dot", "r": 0.9, "g": 0, "b": 0}]
+[{"y": 0, "x": 0, "shape": "circle", "R": 8e6}, {"x": 2e7, "y": 2e7, "shape": "dot", "r": 0.8, "g": 0, "b": 0}]
+[{"y": 0, "x": 0, "shape": "circle", "R": 8e6}, {"x": 3e7, "y": 3e7, "shape": "dot", "r": 0.7, "g": 0, "b": 0}]
+[{"y": 0, "x": 0, "shape": "circle", "R": 8e6}, {"x": 4e7, "y": 4e7, "shape": "dot", "r": 0.6, "g": 0, "b": 0}]

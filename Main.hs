@@ -23,6 +23,7 @@ runSimulator fp cfg strat = do
             then return ()
             else do
                 inputPorts <- next strat 
+                print inputPorts
                 run $ updateWorld w' inputPorts
 
 main = do

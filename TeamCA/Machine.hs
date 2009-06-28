@@ -37,8 +37,6 @@ readData is addr = readArray is addr
 -- necessary).
 step :: World -> IO World
 step (World pc sr iports oports is ms) = do
-  let instr = is ! pc
-  --putStrLn $ "step: instr = " ++ (show instr) ++ " pc = " ++ (show pc)
   sr' <- newIORef sr
   oports' <- newIORef oports
   pc' <- newIORef (pc + 1)
@@ -81,11 +79,12 @@ step (World pc sr iports oports is ms) = do
   pcVal <- readIORef pc'
   return $ World pcVal srVal iports oportsVal is ms
     where
+      instr = is ! pc
       rHelper r1 r2 mut = do v1 <- readData ms r1
                              v2 <- readData ms r2
                              let v' = mut v1 v2
                              if isNaN v' || isInfinite v'
-                                 then error $ "vm error: got v' = " ++ show v'
+                                 then error $ "vm error: got v' = " ++ show v' ++ " on instruction " ++ show instr
                                  else writeData (mut v1 v2)
       writeData v = writeArray ms pc v
 

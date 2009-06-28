@@ -53,6 +53,7 @@ class PyGtkWidget(gtk.Widget):
 		json_data = open('icfp.json').read()
 		lines = [simplejson.loads(line) for line in json_data.split('\n') if line]
 		self.universe_size = lines[0]['universe_size']
+		print 'UNIVERSE SIZE = %1.3g' % self.universe_size
 		self.json_data = lines[1:]
 										   
 	def do_realize(self):
@@ -115,7 +116,7 @@ class PyGtkWidget(gtk.Widget):
 		set_rgba = lambda obj: cr.set_source_rgba(get_red(obj), get_green(obj), get_blue(obj), get_alpha(obj))
 
 		x, y, w, h = self.allocation
-		print 'epoch = %d, WIDTH = %r, HEIGHT = %r' % (self.epoch, w, h)
+		dim = min(w, h)
 
 		def scale(thing):
 			"""Scale an object to the correct placement on the buffer. This
@@ -129,11 +130,11 @@ class PyGtkWidget(gtk.Widget):
 			return 25.
 			"""
 
-			# ratio is in the range [0, 1]
+			# ratio is in the range [0, 1], with 0.5 in the center of the universe
 			ratio = 0.5 * (1 + thing / float(self.universe_size))
 			assert 0 <= ratio <= 1
 
-			return min(w, h) * ratio
+			return dim * ratio
 
 		for obj in self.json_data[self.epoch]:
 			assert isinstance(obj, dict)
@@ -142,10 +143,11 @@ class PyGtkWidget(gtk.Widget):
 			x = scale(obj['x'])
 
 			# translate y into cartesian coordinates
-			y = min(h, w) - scale(obj['y'])
+			y = dim - scale(obj['y'])
 
 			if obj['shape'] == 'circle':
-				radius = scale(obj['R'])
+				assert (obj['x'], obj['y']) == (0, 0)
+				radius = dim * obj['R'] / self.universe_size / 2
 				set_rgba(obj)
 				cr.arc(x, y, radius, 0, 2 * math.pi)
 
@@ -154,6 +156,11 @@ class PyGtkWidget(gtk.Widget):
 				set_rgba(obj)
 				cr.arc(x, y, 2, 0, 2 * math.pi)
 				cr.fill()
+
+			#if obj['note'] == 'satellite':
+			#	print 'for satellite, had pos = (%1.3g, %1.3g), chose x, y = %s' % (obj['x'], obj['y'], (x, y))
+			#if obj['note'] == 'earth':
+			#	print 'for earth, had R = %1.3g, chose radius = %s' % (obj['R'], radius)
 			cr.stroke()
 		
 	def do_expose_event(self, event):

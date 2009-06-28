@@ -4,6 +4,7 @@ import Data.Map (findWithDefault)
 import Data.IORef
 import TeamCA.Machine.Types (readPort, outputPorts, inputPorts, Ports, newPorts, writePort)
 import TeamCA.Strategies.Types
+import TeamCA.Math
 
 data EmptyStrategy = EmptyStrategy
 
@@ -27,6 +28,7 @@ instance Strategy RealStrategy where
         outputs <- readIORef $ sOutputs strategy
         let outputs' = take 5 $ output : outputs
         writeIORef (sOutputs strategy) outputs'
+        print $ "polar: " ++ (show . toPolar . oPos $ output)
         return $ (oScore output) /= 0
    
     next strategy = do 
@@ -39,7 +41,7 @@ instance Strategy RealStrategy where
                 return origInput
             else do 
                 print "boost!"
-                return $ writePort 3 1.0 $ writePort 2 0.0 origInput
+                return $ writePort 3 100.0 $ writePort 2 100.0 origInput
 
 data Output = Output { 
     oScore :: Double,

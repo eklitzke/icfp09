@@ -2,7 +2,6 @@ module TeamCA.Strategies.Types
     (
         Strategy
         , next
-        , store
     ) where
 
 import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
@@ -12,6 +11,5 @@ import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
 -- values. The world is then re-run with thse new ports.
 
 class Strategy s where 
-    next :: s -> IO InputPorts
-    store :: s -> OutputPorts -> IO Bool
+    next :: s -> OutputPorts -> IO (Maybe InputPorts)
 

@@ -2,16 +2,14 @@ module TeamCA.Strategies.S1  where
 
 import Data.Map (findWithDefault)
 import Data.IORef
-import TeamCA.Machine.Types (readPort, outputPorts, inputPorts, Ports, newPorts, writePort)
+import TeamCA.Machine.Types (readPort, InputPorts, OutputPorts, outputPorts, inputPorts, Ports, newPorts, writePort)
 import TeamCA.Strategies.Types
 import TeamCA.Math
 
 data EmptyStrategy = EmptyStrategy
 
 instance Strategy EmptyStrategy where
-    store s oports = do
-        return False
-    next s = return $ newPorts 1001
+    next s o = return $ Just $ newPorts 1001
 
 data RealStrategy = RealStrategy {
     sOutputs :: IORef [Output],
@@ -24,48 +22,75 @@ newRealStrategy = do
     return $ RealStrategy s a
     
 instance Strategy RealStrategy where
-    store strategy outputPorts = do
-        let output = toOutput outputPorts
-        --print output
-        outputs <- readIORef $ sOutputs strategy
-        let outputs' = take 5 $ output : outputs
-        writeIORef (sOutputs strategy) outputs'
-        --print $ "polar: " ++ (show . toPolar . oPos $ output)
-        return $ (oScore output) /= 0
-   
-    next strategy = do 
-        outputs <- readIORef $ sOutputs strategy
-        let num = length outputs
-        let origInput = newPorts 1001
-        let output = head outputs
-        let (currRadius, currAngle) = toPolar $ oPos $ head outputs
-        let targetRadius = oRadius $ head outputs
-        print $ toPolar $ oPos $ head outputs
+    next strategy outputPorts = do 
+          saveOutput  
+          if oScore output /= 0 
+            then done 
+            else fmap Just nextInputPorts
+      where 
+        output :: Output
+        output = toOutput outputPorts
 
-        if num == 1
-            then do 
-                    writeIORef (sStartAngle strategy) (Just currAngle)
-                    print "start"
-                    print output
-                    print $ toPolar $ oPos $ head outputs
-                    return $ writePort 3 adj origInput
-            else do 
-                maybeAngle <- readIORef $ sStartAngle strategy
-                case maybeAngle of
-                    Nothing -> return origInput
-                    Just angle -> do
-                        let oppAngle = oppositeRadian angle 
-                        let angleDiff = abs $ oppAngle - currAngle 
-                        let radiusDiff = abs $ currRadius - targetRadius
-                        if angleDiff <= 0.01 && radiusDiff < 1000.0
-                            then do
-                                print "end"
-                                print output
-                                print $ toPolar $ oPos $ head outputs
-                                writeIORef (sStartAngle strategy) Nothing
-                                return $ writePort 3 (-adj) origInput
-                            else return origInput
+        done :: IO (Maybe InputPorts)
+        done = do
+                print "done"
+                print output
+                return Nothing
 
+        saveOutput :: IO ()
+        saveOutput = do 
+            outputs <- getOutputs
+            writeIORef (sOutputs strategy) $ output : outputs
+
+        getOutputs :: IO [Output]
+        getOutputs = readIORef . sOutputs $ strategy
+        
+        setStartAngle :: Double -> IO ()
+        setStartAngle angle = writeIORef (sStartAngle strategy) (Just angle)
+
+        (currRadius, currAngle) = toPolar . oPos $ output
+
+        initialBoost :: IO InputPorts
+        initialBoost = do 
+            setStartAngle currAngle
+            print "Initial boost position:"
+            printPosition
+            return $ writePort 3 adj origInput
+
+        printPosition :: IO ()
+        printPosition = do 
+            print output
+            print $ toPolar $ oPos $ output
+    
+        origInput = newPorts 1001
+        targetRadius = oRadius output
+
+        nextInputPorts :: IO InputPorts
+        nextInputPorts = do 
+            outputs <- getOutputs
+            printPosition
+            if length outputs == 1 
+                then initialBoost
+                else do 
+                    maybeAngle <- readIORef $ sStartAngle strategy
+                    case maybeAngle of
+                        Nothing -> return origInput
+                        Just angle -> do
+                            let oppAngle = oppositeRadian angle 
+                            let angleDiff = abs $ oppAngle - currAngle 
+                            let radiusDiff = abs $ currRadius - targetRadius
+                            if angleDiff <= 0.01 && radiusDiff < 1000.0
+                                then reverseBoost
+                                else return origInput
+
+        clearStartAngle = do 
+            writeIORef (sStartAngle strategy) Nothing
+
+        reverseBoost = do 
+            print "end"
+            printPosition
+            clearStartAngle
+            return $ writePort 3 (-adj) origInput
 
 -- Launch off value 
 -- Boost 

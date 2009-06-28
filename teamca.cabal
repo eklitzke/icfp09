@@ -22,4 +22,4 @@ Library
 
 Executable vm
     main-is:      Main.hs
-    Extensions:   ExistentialQuantification, DeriveDataTypeable
+    Extensions:   ExistentialQuantification, DeriveDataTypeable, ScopedTypeVariables

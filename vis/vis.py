@@ -165,7 +165,7 @@ class PyGtkWidget(gtk.Widget):
 		return self._expose_cairo(event, cr)
 
 
-json_data = open('/home/evan/icfp.json').read()
+json_data = open('icfp.json').read()
 
 win = gtk.Window()
 win.set_title("icfp'09 sim")

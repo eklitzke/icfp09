@@ -18,6 +18,8 @@ Library
                 , binary
                 , containers
                 , bytestring
+                , json
 
 Executable vm
     main-is:      Main.hs
+    Extensions:   ExistentialQuantification, DeriveDataTypeable

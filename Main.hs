@@ -8,30 +8,28 @@ import TeamCA.Machine
 import Data.Map hiding (elems)
 import Data.Array (elems)
 import qualified TeamCA.Strategies.S1 as S1
-import TeamCA.Strategies.Types (store, next)
+import TeamCA.Strategies.Types (next)
+import TeamCA.Strategies.Trace (TraceStrategy(..))
 
 runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
   world@(World _ _ _ _ is ms) <- readWorld fp cfg
-  --putStrLn $ "INSTRUCTIONS =\n" ++ showProgram is
-  --print world
   runSim world
   where
     runSim w = do 
       w' <- runWorld w
-      --print w'
-      isDone <- store strat (outputPorts w')
-      if isDone 
-         then return ()
-         else do inputPorts <- next strat 
-                 runSim $ updateWorld w' inputPorts
+      maybeInput <- next strat (outputPorts w')
+      case maybeInput of
+        Just inputPorts -> runSim $ updateWorld w' inputPorts
+        Nothing -> return ()
 
 main = do
   putStrLn "-= ICFP'09 Sim =-"
   args <- getArgs
   s <- S1.newRealStrategy 
+  let scenario = S1.S1 1001
   if length args /= 2
       then error "usage: vm <obf file> <configuration>"
       else let [obfName, config] = args in
            let cfg = read config :: Int in
-           runSimulator obfName cfg  s
+           runSimulator obfName cfg (TraceStrategy s scenario)

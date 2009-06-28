@@ -9,6 +9,7 @@ import Data.Map hiding (elems)
 import Data.Array (elems)
 import qualified TeamCA.Strategies.S1 as S1
 import TeamCA.Strategies.Types (next)
+import TeamCA.Strategies.Trace (TraceStrategy(..))
 
 runSimulator :: Strategy s => FilePath -> Int -> s -> IO ()
 runSimulator fp cfg strat = do
@@ -30,4 +31,4 @@ main = do
       then error "usage: vm <obf file> <configuration>"
       else let [obfName, config] = args in
            let cfg = read config :: Int in
-           runSimulator obfName cfg  s
+           runSimulator obfName cfg (TraceStrategy s)

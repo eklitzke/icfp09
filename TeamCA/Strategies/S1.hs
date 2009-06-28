@@ -34,7 +34,7 @@ instance Strategy RealStrategy where
         done :: IO (Maybe InputPorts)
         done = do
                 print "done"
-                print output
+                --print output
                 return Nothing
 
         saveOutput :: IO ()
@@ -52,9 +52,10 @@ instance Strategy RealStrategy where
 
         initialBoost :: IO InputPorts
         initialBoost = do 
+            print "initial boost"
             setStartAngle currAngle
-            print "Initial boost position:"
-            printPosition
+            --print "Initial boost position:"
+            --printPosition
             return $ writePort 3 adj origInput
 
         printPosition :: IO ()
@@ -68,7 +69,7 @@ instance Strategy RealStrategy where
         nextInputPorts :: IO InputPorts
         nextInputPorts = do 
             outputs <- getOutputs
-            printPosition
+            --printPosition
             if length outputs == 1 
                 then initialBoost
                 else do 
@@ -88,12 +89,11 @@ instance Strategy RealStrategy where
 
         reverseBoost = do 
             print "end"
-            printPosition
+            --printPosition
             clearStartAngle
             return $ writePort 3 (-adj) origInput
 
--- Launch off value 
--- Boost 
+-- Booost Launch off value 
 adj = -2600.0
 
 oppositeRadian x = fixRad $ x + pi

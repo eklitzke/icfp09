@@ -12,4 +12,3 @@ import TeamCA.Machine.Types (World, OutputPorts, InputPorts)
 
 class Strategy s where 
     next :: s -> OutputPorts -> IO (Maybe InputPorts)
-

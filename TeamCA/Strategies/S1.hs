@@ -72,7 +72,6 @@ instance Strategy RealStrategy where
         nextInputPorts :: IO InputPorts
         nextInputPorts = do 
             outputs <- getOutputs
-            --printPosition
             if length outputs == 1 
                 then initialBoost
                 else do 
@@ -92,7 +91,6 @@ instance Strategy RealStrategy where
 
         reverseBoost = do 
             print "end"
-            --printPosition
             clearStartAngle
             return $ writePort 3 (-adj) origInput
 
@@ -109,14 +107,16 @@ data Output = Output {
     oScore :: Double,
     oFuel :: Double,
     oPos :: (Double, Double),
+    oPosPolar :: (Double, Double),
     oRadius :: Double
 } deriving (Typeable, Data, Ord, Eq, Show)
 
-toOutput oports = Output score fuel pos radius
+toOutput oports = Output score fuel pos posPolar radius
     where 
           score = look 0x0
           fuel = look 0x1 
           pos = (look 0x2, look 0x3)
+          posPolar = toPolar pos
           radius = look 0x4
           look key = readPort key oports
 

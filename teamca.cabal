@@ -14,7 +14,7 @@ Build-Type: Simple
 Library
   Exposed-Modules: TeamCA.Machine
   Build-Depends:  array
-                , base
+                , base >= 4.0.0.0
                 , binary
                 , containers
                 , bytestring

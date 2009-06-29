@@ -73,12 +73,13 @@ data Arc = Arc Vector Vector Double
 data Course = Course Point Double
 
 -- Calculate where a point will be some number of seconds in the future
-futurePos :: Course -> Double -> Point
-futurePos (Course (x, y) v) t = (x', y')
+futurePos :: Point -> Double -> Point
+futurePos (x, y) t = (x', y')
     where
       radius = distOrigin (x, y)
-      omega = v / radius
-      theta = t * omega * (-1 * (signum v))
+      omega = (velocity (x, y)) / radius
+
+      theta = (-t) * omega
 
       cost = cos theta
       sint = sin theta
@@ -92,9 +93,11 @@ thresh = 1.0
 tangentVector :: Point -> Vector
 tangentVector (x, y) = normalize (-y, x)
 
+velocity :: Point -> Double
+velocity p = let r = distOrigin p in sqrt (mu / r)
 
-computeJump :: Double -> Course -> Course -> Maybe (Vector, Vector)
-computeJump time (Course (xs, ys) vs) targ@(Course (xt, yt) vt)
+computeJump :: Double -> Point -> Point -> Maybe (Vector, Vector)
+computeJump time (xs, ys) (xt, yt)
     | time < 2  = error "time was too small!"
     | otherwise = if delta < thresh then Just (dv1, dv2) else Nothing
     where
@@ -102,7 +105,7 @@ computeJump time (Course (xs, ys) vs) targ@(Course (xt, yt) vt)
       radius_targ = distOrigin (xt, yt)
       radius_ratio = (-1) * radius_targ / radius_sat
       opp_point = (radius_ratio * xs, radius_ratio * ys)
-      targ_point = futurePos targ time
+      targ_point = futurePos (xt, yt) time
       delta = dist opp_point targ_point
       vec = tangentVector (xs, ys)
       dv1 = delta1 radius_sat radius_targ vec

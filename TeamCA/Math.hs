@@ -35,6 +35,11 @@ normalizedVector (x1, y1) (x2, y2) = (xv / l, yv / l)
       xv = x2 - x1
       yv = y2 - y1
       l = distance (0, 0) (xv, yv)
+
+normalize :: Vector -> Vector
+normalize (x, y) = (x / mag, y / mag)
+    where
+      mag = distOrigin (x, y)
           
 mu :: Double
 mu = 6.67428e-11 * 6.0e24
@@ -59,3 +64,46 @@ delta2 r1 r2 vec = (lhs*rhs) `times` vec
     where
       lhs = sqrt (mu / r2)
       rhs = 1 - (sqrt (2 * r1 / (r1 + r2)))
+
+-- The fields are 
+data Arc = Arc Vector Vector Double
+
+-- The fields are position, speed. Speed is positive for clockwise rotation,
+-- negative for counter-clockwise rotation
+data Course = Course Point Double
+
+-- Calculate where a point will be some number of seconds in the future
+futurePos :: Course -> Double -> Point
+futurePos (Course (x, y) v) t = (x', y')
+    where
+      radius = distOrigin (x, y)
+      omega = v / radius
+      theta = t * omega * (-1 * (signum v))
+
+      cost = cos theta
+      sint = sin theta
+
+      x' = x * cost + y * sint
+      y' = y * cost - x * sint
+
+thresh :: Double
+thresh = 1.0
+
+tangentVector :: Point -> Vector
+tangentVector (x, y) = normalize (-y, x)
+
+
+computeJump :: Double -> Course -> Course -> Maybe (Vector, Vector)
+computeJump time (Course (xs, ys) vs) targ@(Course (xt, yt) vt)
+    | time < 2  = error "time was too small!"
+    | otherwise = if delta < thresh then Just (dv1, dv2) else Nothing
+    where
+      radius_sat = distOrigin (xs, ys)
+      radius_targ = distOrigin (xt, yt)
+      radius_ratio = (-1) * radius_targ / radius_sat
+      opp_point = (radius_ratio * xs, radius_ratio * ys)
+      targ_point = futurePos targ time
+      delta = dist opp_point targ_point
+      vec = tangentVector (xs, ys)
+      dv1 = delta1 radius_sat radius_targ vec
+      dv2 = delta1 radius_sat radius_targ vec

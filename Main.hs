@@ -81,6 +81,7 @@ main' opts = do
   refMaybeTraceH <- newIORef Nothing
   strategy <- case (optStrategy opts) of
     "hohmann" -> fmap S S1.newHohmannTransfer 
+    "hohmannwait" -> fmap S S2.newHohmannTransfer 
     otherwise -> error $ "unknown strategy: " ++ otherwise
   traceH <- openFile (optTrace opts) WriteMode
   let strategy' = 

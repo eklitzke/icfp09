@@ -99,7 +99,7 @@ instance Strategy HohmannTransfer where
             let v = normalizedVector (oPos o1) (oPos o2)
             print v
             let r1 = fst . oPosPolar $ o1
-            let r2 = oRadius o1
+            let r2 = fst . oPosTargetPolar $ o1
             let boost1 = delta1 r1 r2 v
             let boost2 = delta2 r1 r2 v
             let boost2' = (-fst boost2, -(snd boost2))
@@ -138,7 +138,6 @@ instance Strategy HohmannTransfer where
             print $ toPolar $ oPos $ output
 
         origInput = newPorts 1001
-        targetRadius = oRadius output
 
         nextInputPorts :: IO InputPorts
         nextInputPorts = do
@@ -166,19 +165,22 @@ fixRad r | r >= 0 && r <= (2.0 * pi) = r
 data Output = Output {
     oScore :: Double,
     oFuel :: Double,
-    oPos :: (Double, Double),
-    oPosPolar :: (Double, Double),
-    oRadius :: Double
+    oPos :: Point,
+    oPosPolar :: Vector,
+    oPosTarget :: Point,
+    oPosTargetPolar :: Vector
 } deriving (Typeable, Data, Ord, Eq, Show)
 
-toOutput oports = Output score fuel pos posPolar radius
+toOutput oports = Output score fuel pos posPolar posTarget posTargetPolar
     where
           score = look 0x0
           fuel = look 0x1
           pos = (look 0x2, look 0x3)
           posPolar = toPolar pos
-          radius = look 0x4
           look key = readPort key oports
+          relPosTarget = (look 0x4, look 0x5)
+          posTargetPolar = toPolar posTarget
+          posTarget = (fst relPosTarget + fst pos, snd relPosTarget + snd pos)
 
 data S2 = S2 Int
 

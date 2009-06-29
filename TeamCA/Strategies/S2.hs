@@ -33,9 +33,10 @@ instance Strategy HohmannTransfer where
     next strategy outputPorts = do
           decrWait
           saveOutput
-          if oScore output /= 0
-            then done
-            else fmap Just nextInputPorts
+          --if oScore output /= 0
+          --then done
+          --else fmap Just nextInputPorts
+          return $ Just origInput
       where
         output :: Output
         output = toOutput outputPorts

@@ -89,7 +89,7 @@ futurePos (x, y) t = (x', y')
       y' = y * cost - x * sint
 
 thresh :: Double
-thresh = 1.0
+thresh = 1000.0
 
 tangentVector :: Point -> Vector
 tangentVector (x, y) = normalize (-y, x)

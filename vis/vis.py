@@ -184,16 +184,13 @@ def translate_json(fname, skip=20):
 		data = simplejson.loads(line)
 
 		if not output:
-			s = max(rad(data['oPos']), rad(data['oPosTarget'])) * 4
+			s = max(rad(data['oPos']), rad(data['oPosTarget'])) * 1.2
 			output.append({'universe_size': s})
 
 		if skip and i % skip != 0:
 			continue
 
 		out = []
-
-		# Draw the target radius as a green circle
-		#out.append({'shape': 'circle', 'R': data['oRadius'], 'x': 0, 'y': 0, 'r': 0, 'b': 0, 'g': 1, 'note': 'target radius'})
 
 		# Draw the satellite as a red dot
 		out.append({'shape': 'dot', 'x': data['oPos'][0], 'y': data['oPos'][1], 'r': 1, 'b': 0, 'g': 0, 'note': 'satellite'})

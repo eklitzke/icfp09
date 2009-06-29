@@ -110,4 +110,4 @@ computeJump time (xs, ys) (xt, yt)
       delta = dist opp_point targ_point
       vec = tangentVector (xs, ys)
       dv1 = delta1 radius_sat radius_targ vec
-      dv2 = delta1 radius_sat radius_targ vec
+      dv2 = delta2 radius_sat radius_targ vec

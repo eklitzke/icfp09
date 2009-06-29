@@ -86,11 +86,14 @@ instance Strategy HohmannTransfer where
         
         followArc arc@(Arc v1 v2 t) = do
             writeIORef (sArc strategy) arc'
+            if end 
+                then print "end arc"
+                else return ()
             boost (-fst b, -snd b)
             where 
-                arc' = if t < 1 then Nothing else Just $ Arc v1 v2 (t - 1.0)
-                b = if t < 1 then v2 else (0, 0) 
-            
+                arc' = if end then Nothing else Just $ Arc v1 v2 (t - 1.0)
+                b = if end then v2 else (0, 0) 
+                end = t < 1 
 
 
 -- Booost Launch off value

@@ -15,7 +15,6 @@ instance Strategy EmptyStrategy where
     next s o = return $ Just $ newPorts 1001
 
 data HohmannTransfer = HohmannTransfer {
-    sOutputs :: IORef [Output],
     sArc :: IORef (Maybe Arc),
     sArced :: IORef Bool
 }
@@ -23,15 +22,12 @@ data HohmannTransfer = HohmannTransfer {
 data Transfer = Transfer Int Vector
 
 newHohmannTransfer = do
-    s <- newIORef []
     w <- newIORef Nothing
     b <- newIORef False
-    return $ HohmannTransfer s w b
-
+    return $ HohmannTransfer w b
 
 instance Strategy HohmannTransfer where
     next strategy outputPorts = do
-          saveOutput
           if oScore output /= 0
               then done
               else fmap Just nextInputPorts
@@ -44,14 +40,6 @@ instance Strategy HohmannTransfer where
                 print "done"
                 print output
                 return Nothing
-
-        saveOutput :: IO ()
-        saveOutput = do
-            outputs <- getOutputs
-            writeIORef (sOutputs strategy) $ take 10 $ output : outputs
-
-        getOutputs :: IO [Output]
-        getOutputs = readIORef . sOutputs $ strategy
 
         boost b = return $ writePort 2 (fst b) $ writePort 3 (snd b) origInput
 
@@ -67,11 +55,10 @@ instance Strategy HohmannTransfer where
                 otherwise -> seekArc
 
         seekArc = do
-            outputs <- getOutputs
-            let pSat1 = oPos . head $ outputs
-            let pSat2 = oPosTarget . head $ outputs
-            let rSat1 = fst . oPosPolar . head $ outputs
-            let rSat2 = fst . oPosTargetPolar . head $ outputs
+            let pSat1 = oPos $ output
+            let pSat2 = oPosTarget $ output
+            let rSat1 = fst . oPosPolar $ output
+            let rSat2 = fst . oPosTargetPolar $ output
             let t = hohTime rSat1 rSat2 
             case computeJump t pSat1 pSat2 of 
                 Just (v1, v2) -> startArc $ Arc v1 v2 t
@@ -87,23 +74,17 @@ instance Strategy HohmannTransfer where
         followArc arc@(Arc v1 v2 t) = do
             writeIORef (sArc strategy) arc'
             if end 
-                then print "end arc"
+                then do 
+                    print "end arc"
+                    print satDist
                 else return ()
             boost (-fst b, -snd b)
             where 
                 arc' = if end then Nothing else Just $ Arc v1 v2 (t - 1.0)
                 b = if end then v2 else (0, 0) 
-                end = t < 1 
-
-
--- Booost Launch off value
-adj = -2500.0
-
-oppositeRadian x = fixRad $ x + pi
-
-fixRad r | r >= 0 && r <= (2.0 * pi) = r
-         | r < 0 = error "unexpected negative radian"
-         | otherwise = fixRad (r -  (2.0 * pi))
+                end = t <= -1
+        
+        satDist = dist (oPos output) (oPosTarget output)
 
 data Output = Output {
     oScore :: Double,

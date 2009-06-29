@@ -41,9 +41,6 @@ module TeamCA.Machine.Types
             , Div
             , Output
             , Phi )
-    -- Solutions
-    , Frame(..)
-    , Solution(..)
     , showInstruction
     , showProgram
 
@@ -214,11 +211,6 @@ type TeamID = Int
 type ScenarioID = Int
 type TimeStep = Int
 
-data Solution = Solution TeamID ScenarioID [Frame]
-    deriving (Ord, Eq, Show)
-
-data Frame = Frame TimeStep Ports
-    deriving (Ord, Eq, Show)
 
 data DType = DType DOper Addr Addr
     deriving (Ord, Eq, Show)

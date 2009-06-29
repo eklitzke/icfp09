@@ -12,46 +12,9 @@ import qualified Data.Map
 import TeamCA.Machine.Types
 import TeamCA.Machine.Util
 
--- Reduce redundant and empty frames
--- If a frame has an empty port value, remove it
-reduceFrames :: [Frame] -> [Frame]
-reduceFrames [] = []
-reduceFrames (x@(Frame _ p) : [])
-                | (Data.Map.size p) > 0 = [x]
-                | otherwise  = []
-reduceFrames (x@(Frame _ p1) : (x'@(Frame _ p2) : xs)) 
-    | (Data.Map.size p1) == 0 = reduceFrames $ x' : xs
-    | p1 == p2 = reduceFrames $ x : xs
-    | otherwise = x : (reduceFrames $ x' : xs)
-
-
-
-
-instance Binary Solution where
-    put (Solution team scenario frames) = do
-        putWord32le . fromIntegral $ 0xCAFEBABE
-        putWord32le . fromIntegral $ team
-        putWord32le . fromIntegral $ scenario
-        mapM_ put frames
-    get = undefined
-
-instance Binary Frame where
-    get = undefined
-    put (Frame ts port) = do 
-        putWord32le . fromIntegral $ ts
-        putWord32le . fromIntegral $ Data.Map.size port
-        forM_ (Data.Map.toList port) $ \(addr, val) -> do 
-            putWord32le . fromIntegral $ addr
-            putIEEE754le val
-
-writeSolution :: FilePath -> Solution -> IO ()
-writeSolution = encodeFile
-
 putIEEE754le val = putWord64le . doubleToWord64 $ val
 
 -- A number with n one digits
-
-
 
 decodeInstruction :: Word32 -> Either SType DType
 decodeInstruction w

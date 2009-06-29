@@ -1,11 +1,11 @@
-module TeamCA.Strategies.Trace (TraceStrategy(..)) where
+module TeamCA.Strategies.Trace (OutputTrace(..)) where
 
 import TeamCA.Strategies.Types (Strategy, next, Scenario, outputPortsToJSON)
 import System.IO
 
-data TraceStrategy = forall a b. (Strategy a, Scenario b)  => TraceStrategy a b Handle
+data OutputTrace = forall a b. (Strategy a, Scenario b)  => OutputTrace a b Handle
 
-instance Strategy TraceStrategy where 
-    next (TraceStrategy sub scenario handle) ports = do
+instance Strategy OutputTrace where 
+    next (OutputTrace sub scenario handle) ports = do
         hPutStrLn handle $ outputPortsToJSON scenario ports
         next sub ports

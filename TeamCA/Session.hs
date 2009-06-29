@@ -32,15 +32,17 @@ instance Binary Session where
 
 instance Binary Frame where
     get = undefined
-    put (Frame ts x y) = do 
+    put (Frame ts c x y) = do 
         putWord32le . fromIntegral $ ts
-        putWord32le $ fromIntegral 2
+        putWord32le $ fromIntegral 3
+        putWord32le $ fromIntegral 0x3E80
+        putIEEE754le $ c
         putWord32le $ fromIntegral 2
         putIEEE754le x
         putWord32le $ fromIntegral 3
         putIEEE754le y
 
-data Frame = Frame Timestep Double Double
+data Frame = Frame Timestep Double Double Double
     deriving (Ord, Eq, Show)
 
 newSession team scenario = Session team scenario [] (-1)
@@ -50,10 +52,11 @@ addInput input session = session{sessFrames=f', sessTick=t'}
     where 
         f = sessFrames session
         t' = 1 + sessTick session
-        fr = Frame t' x y
+        c = fromIntegral $ sessScenarioID session
+        fr = Frame t' c x y
         f' = case f of 
                 [] -> [fr]
-                ((Frame t x' y') : xs) -> 
+                ((Frame t _ x' y') : xs) -> 
                     if (x /= x' || y /= y') then (fr : f) else f
         x = Data.Map.findWithDefault 0.0 2 input
         y = Data.Map.findWithDefault 0.0 3 input

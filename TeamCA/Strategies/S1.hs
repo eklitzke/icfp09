@@ -102,7 +102,7 @@ instance Strategy HohmannTransfer where
             let r2 = oRadius o1
             let boost1 = delta1 r1 r2 v
             let boost2 = delta2 r1 r2 v
-            let boost2' = (fst boost2, -(snd boost2))
+            let boost2' = (-fst boost2, -(snd boost2))
             let t = hohTime r1 r2
             return $ (boost1, boost2', t) 
 

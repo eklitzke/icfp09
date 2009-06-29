@@ -177,12 +177,15 @@ class PyGtkWidget(gtk.Widget):
 def translate_json(fname, skip=20):
 	output = []
 
+	rad = lambda t: math.sqrt(t[0]**2 + t[1]**2)
+
 	for i, line in enumerate(open(fname, 'r')):
 
 		data = simplejson.loads(line)
 
 		if not output:
-			output.append({'universe_size': data['oRadius'] * 1.3})
+			s = max(rad(data['oPos']), rad(data['oPosTarget'])) * 2
+			output.append({'universe_size': s})
 
 		if skip and i % skip != 0:
 			continue
@@ -190,14 +193,17 @@ def translate_json(fname, skip=20):
 		out = []
 
 		# Draw the target radius as a green circle
-		out.append({'shape': 'circle', 'R': data['oRadius'], 'x': 0, 'y': 0, 'r': 0, 'b': 0, 'g': 1, 'note': 'target radius'})
+		#out.append({'shape': 'circle', 'R': data['oRadius'], 'x': 0, 'y': 0, 'r': 0, 'b': 0, 'g': 1, 'note': 'target radius'})
 
 		# Draw the satellite as a red dot
 		out.append({'shape': 'dot', 'x': data['oPos'][0], 'y': data['oPos'][1], 'r': 1, 'b': 0, 'g': 0, 'note': 'satellite'})
 
+		# Draw the target as a purple dot
+		out.append({'shape': 'dot', 'x': data['oPosTarget'][0], 'y': data['oPosTarget'][1], 'r': 0, 'b': 0, 'g': 0.7, 'note': 'target'})
+
 		# Draw the earth as a blue circle at (0, 0), with a black dot at the origin
-		out.append({'shape': 'circle', 'R': 6.357e6, 'x': 0, 'y': 0, 'b': 1, 'r': 0, 'g': 0, 'fill': True, 'note': 'earth'})
-		out.append({'shape': 'dot', 'x': 0, 'y': 0, 'b': 0, 'r': 0, 'g': 0, 'note': 'origin', 'alpha': 1.0})
+		out.append({'shape': 'circle', 'R': 6.357e6, 'x': 0, 'y': 0, 'b': 1, 'r': 0, 'g': 0, 'fill': True, 'note': 'earth', 'alpha': 0.4})
+		#out.append({'shape': 'dot', 'x': 0, 'y': 0, 'b': 0, 'r': 0, 'g': 0, 'note': 'origin', 'alpha': 1.0})
 		output.append(out)
 	return output
 

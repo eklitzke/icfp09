@@ -67,6 +67,7 @@ delta2 r1 r2 vec = (lhs*rhs) `times` vec
 
 -- The fields are 
 data Arc = Arc Vector Vector Double
+    deriving (Ord, Eq, Show)
 
 -- The fields are position, speed. Speed is positive for clockwise rotation,
 -- negative for counter-clockwise rotation

@@ -20,6 +20,8 @@ data HohmannTransfer = HohmannTransfer {
     sBoost2 :: IORef (Maybe Vector)
 }
 
+data Transfer = Transfer Int Vector
+
 newHohmannTransfer = do 
     s <- newIORef [] 
     w <- newIORef Nothing
@@ -92,13 +94,15 @@ instance Strategy HohmannTransfer where
          
         getBoosts :: IO (Vector, Vector, Double)
         getBoosts = do 
-            o <- fmap head getOutputs
-            currV <- getVelocity
-            let r1 = fst currV
-            let r2 = oRadius o
-            let boost1 = delta1 r1 r2 currV
-            let boost2 = delta2 r1 r2 currV
-            let t =  hohTime r1 r2
+            o1 <- fmap head getOutputs
+            o2 <- fmap (head . tail) getOutputs
+            let v = normalizedVector (oPos o1) (oPos o2)
+            print v
+            let r1 = fst . oPosPolar $ o1
+            let r2 = oRadius o1
+            let boost1 = delta1 r1 r2 v
+            let boost2 = delta2 r1 r2 v
+            let t = hohTime r1 r2
             return $ (boost1, boost2, t) 
 
         getVelocity :: IO (Double, Double)

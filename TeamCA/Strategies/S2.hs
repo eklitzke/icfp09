@@ -181,7 +181,7 @@ toOutput oports = Output score fuel pos posPolar posTarget posTargetPolar
           look key = readPort key oports
           relPosTarget = (look 0x4, look 0x5)
           posTargetPolar = toPolar posTarget
-          posTarget = (fst relPosTarget - fst pos, snd relPosTarget - snd pos)
+          posTarget = (fst pos - fst relPosTarget, snd pos - snd relPosTarget)
 
 data S2 = S2 Int
 

@@ -184,7 +184,7 @@ def translate_json(fname, skip=20):
 		data = simplejson.loads(line)
 
 		if not output:
-			s = max(rad(data['oPos']), rad(data['oPosTarget'])) * 2
+			s = max(rad(data['oPos']), rad(data['oPosTarget'])) * 4
 			output.append({'universe_size': s})
 
 		if skip and i % skip != 0:

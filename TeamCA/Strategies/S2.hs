@@ -184,4 +184,4 @@ data S2 = S2 Int
 
 instance Scenario S2 where
    outputPortsToJSON scenario ports = encodeJSON . toOutput $ ports
-   config (S1 i) = i
+   config (S2 i) = i

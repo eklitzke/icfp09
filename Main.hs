@@ -13,10 +13,10 @@ import System.IO (openFile, hClose, IOMode(..))
 import TeamCA.Machine
 import TeamCA.Machine.Types
 import TeamCA.Strategies.Trace (OutputTrace(..))
-import TeamCA.Strategies.Types (Strategy)
-import TeamCA.Strategies.Types (next)
+import TeamCA.Strategies.Types (Strategy, Scenario, next)
 import qualified TeamCA.Session as Session
 import qualified TeamCA.Strategies.S1 as S1
+import qualified TeamCA.Strategies.S2 as S2
 
 runSimulator ::  Strategy s => IORef Session.Session -> FilePath -> Int -> s -> IO ()
 runSimulator sessRef fp cfg strat = do
@@ -79,12 +79,13 @@ main = do
 
 main' opts = do 
   refMaybeTraceH <- newIORef Nothing
-  let scenario = S1.S1 1001
   strategy <- case (optStrategy opts) of
     "hohmann" -> fmap S S1.newHohmannTransfer 
     otherwise -> error $ "unknown strategy: " ++ otherwise
   traceH <- openFile (optTrace opts) WriteMode
-  let strategy' = case strategy of S x -> S $ OutputTrace x scenario traceH  
+  let strategy' = 
+        case (scenario, strategy) of 
+            (Sc y, S x) -> S $ OutputTrace x y traceH
   let obfName = optInput opts
   let cfg = optScenario opts
   sessRef <- newIORef $ Session.newSession teamID cfg
@@ -93,9 +94,16 @@ main' opts = do
   encodeFile (optSession opts) sess
   hClose traceH
     where 
+        scenario :: Sc
         scenario = case optScenario opts of
-            1001 -> S1.S1 1001
-            1002 -> S1.S1 1002
-            1003 -> S1.S1 1003
-            1004 -> S1.S1 1004
-            otherwise -> error "unexpected scenario"
+                    1001 -> Sc $ S1.S1 1001
+                    1002 -> Sc $ S1.S1 1002
+                    1003 -> Sc $ S1.S1 1003
+                    1004 -> Sc $ S1.S1 1004
+                    2001 -> Sc $ S2.S2 2001
+                    2002 -> Sc $ S2.S2 2002
+                    2003 -> Sc $ S2.S2 2003
+                    2004 -> Sc $ S2.S2 2004
+                    otherwise -> error "unexpected scenario"
+
+data Sc = forall a. Scenario a => Sc a

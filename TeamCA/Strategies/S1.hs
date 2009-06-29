@@ -49,7 +49,7 @@ instance Strategy HohmannTransfer where
         saveOutput :: IO ()
         saveOutput = do 
             outputs <- getOutputs
-            writeIORef (sOutputs strategy) $ output : outputs
+            writeIORef (sOutputs strategy) $ take 10 $ output : outputs
 
         getOutputs :: IO [Output]
         getOutputs = readIORef . sOutputs $ strategy
@@ -77,9 +77,10 @@ instance Strategy HohmannTransfer where
         readyForBoost2 :: IO Bool
         readyForBoost2 = do
             maybeI <- readIORef (sWait strategy) 
-            case maybeI of 
-                Just 0 -> return True
-                otherwise -> return False
+            return $ case maybeI of 
+                Just 0 -> True
+                Just 1 -> True
+                otherwise -> False
         
         getBoost2 :: IO (Maybe Vector)
         getBoost2 = readIORef (sBoost2 strategy)
@@ -146,7 +147,11 @@ instance Strategy HohmannTransfer where
             mBoost2 <- getBoost2
             case (length outputs, ready, mBoost2) of
                 (2, _, _)    -> initialBoost
-                (_, True, Just b) -> boost b
+                (_, True, Just b) -> do 
+                    print "second boost"
+                    print output
+                    print b
+                    boost b
                 otherwise -> boost (0, 0)
 
 -- Booost Launch off value 

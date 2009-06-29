@@ -50,7 +50,7 @@ delta1 r1 r2 vec = (lhs*rhs) `times` vec
       lhs = sqrt (mu / r1)
       rhs = (sqrt (2 * r2 / (r1 + r2))) - 1
 
-mu8 = mu * 8
+mu8 = mu * 8.0
 hohTime radius1 radius2 = pi * sqrt (((radius1 + radius2) ^ 3) / mu8)
  
 -- same note as above

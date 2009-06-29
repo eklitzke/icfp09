@@ -79,7 +79,7 @@ futurePos (x, y) t = (x', y')
       radius = distOrigin (x, y)
       omega = (velocity (x, y)) / radius
 
-      theta = (-t) * omega
+      theta = t * omega
 
       cost = cos theta
       sint = sin theta

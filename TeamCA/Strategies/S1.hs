@@ -16,19 +16,23 @@ instance Strategy EmptyStrategy where
 
 data HohmannTransfer = HohmannTransfer {
     sOutputs :: IORef [Output],
-    sStartAngle :: IORef (Maybe Double)
+    sWait :: IORef (Maybe Int),
+    sBoost2 :: IORef (Maybe Vector)
 }
 
 newHohmannTransfer = do 
     s <- newIORef [] 
-    a <- newIORef Nothing
-    return $ HohmannTransfer s a
+    w <- newIORef Nothing
+    b <- newIORef Nothing
+    return $ HohmannTransfer s w b
+
     
 instance Strategy HohmannTransfer where
     next strategy outputPorts = do 
+          decrWait
           saveOutput  
           if oScore output /= 0 
-            then done 
+            then done
             else fmap Just nextInputPorts
       where 
         output :: Output
@@ -37,7 +41,7 @@ instance Strategy HohmannTransfer where
         done :: IO (Maybe InputPorts)
         done = do
                 print "done"
-                --print output
+                print output
                 return Nothing
 
         saveOutput :: IO ()
@@ -48,25 +52,57 @@ instance Strategy HohmannTransfer where
         getOutputs :: IO [Output]
         getOutputs = readIORef . sOutputs $ strategy
         
-        setStartAngle :: Double -> IO ()
-        setStartAngle angle = writeIORef (sStartAngle strategy) (Just angle)
-
         (currRadius, currAngle) = toPolar . oPos $ output
 
         initialBoost :: IO InputPorts
         initialBoost = do 
             print "initial boost"
-            setStartAngle currAngle
-            --print "Initial boost position:"
-            --printPosition
-            (x, y) <- getBoostXY 
-            return $ writePort 2 x $ writePort 3 y origInput
+            (boost1, boost2, wait) <- getBoosts
+            print boost1
+            print boost2
+            print wait
+            setWait $ fromIntegral $ round $ wait
+            setBoost2 boost2
+            boost boost1
 
-        getBoostXY :: IO (Double, Double)
-        getBoostXY = return (0.0, -2500.0)
+        boost b = return $ writePort 2 (fst b) $ writePort 3 (snd b) origInput
 
-        velocity :: IO (Double, Double)
-        velocity = do 
+        setWait :: Int -> IO ()
+        setWait i = writeIORef (sWait strategy) (Just i)
+
+        setBoost2 vector = writeIORef (sBoost2 strategy) (Just vector)
+            
+        readyForBoost2 :: IO Bool
+        readyForBoost2 = do
+            maybeI <- readIORef (sWait strategy) 
+            case maybeI of 
+                Just 0 -> return True
+                otherwise -> return False
+        
+        getBoost2 :: IO (Maybe Vector)
+        getBoost2 = readIORef (sBoost2 strategy)
+
+        decrWait = do 
+            maybeI <- readIORef (sWait strategy)
+            writeIORef (sWait strategy) $
+                case maybeI of 
+                   Nothing -> Nothing
+                   Just 0  -> Nothing
+                   Just i  -> Just (i - 1)  
+         
+        getBoosts :: IO (Vector, Vector, Double)
+        getBoosts = do 
+            o <- fmap head getOutputs
+            currV <- getVelocity
+            let r1 = fst currV
+            let r2 = oRadius o
+            let boost1 = delta1 r1 r2 currV
+            let boost2 = delta2 r1 r2 currV
+            let t =  hohTime r1 r2
+            return $ (boost1, boost2, t) 
+
+        getVelocity :: IO (Double, Double)
+        getVelocity = do 
             outputs <- getOutputs
             let i = head outputs
             let j = head . tail $ outputs
@@ -75,8 +111,8 @@ instance Strategy HohmannTransfer where
                 then return (0.0, 0.0)
                 else return k
 
-        acceleration :: IO (Double, Double)
-        acceleration = do 
+        getAcceleration :: IO (Double, Double)
+        getAcceleration = do 
             outputs <- getOutputs
             let i = head outputs
             let j = head . tail $ outputs
@@ -88,16 +124,8 @@ instance Strategy HohmannTransfer where
                 then return (0, 0)
                 else return o
 
-        -- the velocity component to begin the transit
-        hohBegin grav radius1 radius2 = 
-                sqrt (grav / radius1) * (-1.0 + sqrt (2 * radius2 / (radius1 + radius2)))
-
-        -- the velocity component to end the transit
-        hohEnd grav radius1 radius2 = 
-                sqrt (grav / radius2) * (1.0 - sqrt (2 * radius1 / (radius1 + radius2)))
-
-        -- the time it takes to make the transit between orbits
-        hohTime grav radius1 radius2 = pi * sqrt (((radius1 + radius2) ^ 3) / 8 * grav)
+        mu = 389600.0
+        mu8 = 8.0 * mu
 
         printPosition :: IO ()
         printPosition = do 
@@ -110,27 +138,12 @@ instance Strategy HohmannTransfer where
         nextInputPorts :: IO InputPorts
         nextInputPorts = do 
             outputs <- getOutputs
-            if length outputs == 2
-                then initialBoost
-                else do 
-                    maybeAngle <- readIORef $ sStartAngle strategy
-                    case maybeAngle of
-                        Nothing -> return origInput
-                        Just angle -> do
-                            let oppAngle = oppositeRadian angle 
-                            let angleDiff = abs $ oppAngle - currAngle 
-                            let radiusDiff = abs $ currRadius - targetRadius
-                            if angleDiff <= 0.01 && radiusDiff < 1000.0
-                                then reverseBoost
-                                else return origInput
-
-        clearStartAngle = do 
-            writeIORef (sStartAngle strategy) Nothing
-
-        reverseBoost = do 
-            print "end"
-            clearStartAngle
-            return $ writePort 3 (-adj) origInput
+            ready <- readyForBoost2
+            mBoost2 <- getBoost2
+            case (length outputs, ready, mBoost2) of
+                (2, _, _)    -> initialBoost
+                (_, True, Just b) -> boost b
+                otherwise -> boost (0, 0)
 
 -- Booost Launch off value 
 adj = -2500.0

@@ -33,17 +33,32 @@ runSimulator sessRef fp cfg strat = do
             Nothing -> return ()
 
 data Options = Options {
-    optTrace :: Maybe String
+    optTrace :: String,
+    optSession :: String,
+    optInput :: String,
+    optScenario :: Int,
+    optStrategy :: String
 }
 
 options :: [OptDescr (Options -> Options)]
 options = [
-            (Option ['t'] ["trace"] (OptArg traceArg "FILE") "trace FILE")
+            (Option ['t'] ["trace"] (ReqArg traceArg "FILE") "trace FILE"),
+            (Option ['s'] ["session"] (ReqArg sessArg "SESSION") "session SESSIONFILE"),
+            (Option ['i'] ["input"] (ReqArg (\x o -> o{optInput=x}) "INPUT") "input INPUTFILE"),
+            (Option ['c'] ["scenario"] (ReqArg (\x o -> o{optScenario=read x}) "SCENARIO") "scenario SCENARIO"),
+            (Option ['c'] ["strategy"] (ReqArg (\x o -> o{optStrategy=x}) "STRATEGY") "strategy STRATEGY")
     ]   
-traceArg maybeF opts = opts {optTrace=maybeF}
-    
 
-defaultOptions = Options { optTrace = Nothing}
+traceArg f opts = opts {optTrace=f}
+sessArg f opts = opts {optSession=f}
+
+defaultOptions = Options { 
+    optTrace = "",
+    optSession = "",
+    optInput = "",
+    optScenario = -1,
+    optStrategy = ""
+    }
 
 parseOpts :: [String] -> IO (Options, [String])
 parseOpts argv = 
@@ -52,7 +67,6 @@ parseOpts argv =
           (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
       where header = "Usage: vm [OPTION...] files..."
 
-
 -- helper to pass around typeclassed values
 data S = forall a. Strategy a => S a
 
@@ -60,33 +74,28 @@ teamID = 29
 
 main = do
   putStrLn "-= ICFP'09 Sim =-"
-  (opts, args) <- getArgs >>= parseOpts
-  s <- S1.newHohmannTransfer 
+  (opts, _) <- getArgs >>= parseOpts
+  main' opts
+
+main' opts = do 
   refMaybeTraceH <- newIORef Nothing
   let scenario = S1.S1 1001
-
-  s' <- case optTrace opts of
-          Just traceFile -> do 
-                   traceH <- openFile traceFile WriteMode
-                   writeIORef refMaybeTraceH $ Just traceH 
-                   return $ S $ OutputTrace s scenario traceH  
-          Nothing -> return $ S s
-
-
-  if length args /= 2
-      then error "usage: vm <obf file> <configuration>"
-      else do 
-           let [obfName, config] = args
-           let (cfg :: Int) = read config
-           sessRef <- newIORef $ Session.newSession teamID cfg
-           case s' of S str -> runSimulator sessRef obfName cfg str
-           sess <- readIORef sessRef
-           encodeFile "session.out" sess
-
-  maybeTraceH <- readIORef refMaybeTraceH
-  case maybeTraceH of
-      Just traceH -> hClose traceH
-      Nothing -> return ()
-
-
-
+  strategy <- case (optStrategy opts) of
+    "hohmann" -> fmap S S1.newHohmannTransfer 
+    otherwise -> error $ "unknown strategy: " ++ otherwise
+  traceH <- openFile (optTrace opts) WriteMode
+  let strategy' = case strategy of S x -> S $ OutputTrace x scenario traceH  
+  let obfName = optInput opts
+  let cfg = optScenario opts
+  sessRef <- newIORef $ Session.newSession teamID cfg
+  case strategy' of S str -> runSimulator sessRef obfName cfg str
+  sess <- readIORef sessRef
+  encodeFile (optSession opts) sess
+  hClose traceH
+    where 
+        scenario = case optScenario opts of
+            1001 -> S1.S1 1001
+            1002 -> S1.S1 1002
+            1003 -> S1.S1 1003
+            1004 -> S1.S1 1004
+            otherwise -> error "unexpected scenario"
